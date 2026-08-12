@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { authSchema, AuthFormInput } from '@/schemas/authSchema'
 import { useLoginMutation, useSignupMutation } from '@/hooks/useAuth'
+import { useDisclosure } from '@/hooks/useDisclosure'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -14,12 +14,7 @@ import { Wallet } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
-
-  const [uiState, setUiState] = useState({
-    isSignUp: false,
-    message: '',
-    messageType: 'error' as 'error' | 'success',
-  })
+  const isSignUpMode = useDisclosure(false)
 
   const loginMutation = useLoginMutation()
   const signupMutation = useSignupMutation()
@@ -27,6 +22,7 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
+    reset: resetForm,
     formState: { errors },
   } = useForm<AuthFormInput>({
     resolver: zodResolver(authSchema),
@@ -37,38 +33,22 @@ export default function LoginPage() {
   })
 
   const isLoading = loginMutation.isPending || signupMutation.isPending
+  const activeError = isSignUpMode.isOpen ? signupMutation.error : loginMutation.error
+
+  function toggleMode() {
+    isSignUpMode.onToggle()
+    loginMutation.reset()
+    signupMutation.reset()
+    resetForm()
+  }
 
   async function onSubmit(data: AuthFormInput) {
-    setUiState((prev) => ({ ...prev, message: '' }))
-
-    if (uiState.isSignUp) {
-      try {
-        await signupMutation.mutateAsync(data)
-        setUiState((prev) => ({
-          ...prev,
-          message: 'Pendaftaran berhasil! Silakan cek email Anda untuk konfirmasi atau langsung masuk.',
-          messageType: 'success',
-          isSignUp: false,
-        }))
-      } catch (err: unknown) {
-        setUiState((prev) => ({
-          ...prev,
-          message: err instanceof Error ? err.message : 'Gagal mendaftar.',
-          messageType: 'error',
-        }))
-      }
+    if (isSignUpMode.isOpen) {
+      await signupMutation.mutateAsync(data)
     } else {
-      try {
-        await loginMutation.mutateAsync(data)
-        router.push('/')
-        router.refresh()
-      } catch (err: unknown) {
-        setUiState((prev) => ({
-          ...prev,
-          message: err instanceof Error ? err.message : 'Email atau password salah.',
-          messageType: 'error',
-        }))
-      }
+      await loginMutation.mutateAsync(data)
+      router.push('/')
+      router.refresh()
     }
   }
 
@@ -83,22 +63,22 @@ export default function LoginPage() {
           </div>
           <CardTitle className="text-2xl font-bold tracking-tight">Kasbon</CardTitle>
           <CardDescription>
-            {uiState.isSignUp
+            {isSignUpMode.isOpen
               ? 'Buat akun baru untuk mulai mencatat utang-piutang'
               : 'Masuk ke akun Anda untuk mengelola catatan utang'}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {uiState.message && (
-              <div
-                className={`p-3 text-sm rounded border ${
-                  uiState.messageType === 'error'
-                    ? 'border-red-900/50 bg-red-950/40 text-red-400'
-                    : 'border-emerald-900/50 bg-emerald-950/40 text-emerald-400'
-                }`}
-              >
-                {uiState.message}
+            {activeError && (
+              <div className="p-3 text-sm rounded border border-red-900/50 bg-red-950/40 text-red-400">
+                {activeError.message}
+              </div>
+            )}
+
+            {isSignUpMode.isOpen && signupMutation.isSuccess && (
+              <div className="p-3 text-sm rounded border border-emerald-900/50 bg-emerald-950/40 text-emerald-400">
+                Pendaftaran berhasil! Silakan masuk dengan akun Anda.
               </div>
             )}
 
@@ -137,7 +117,7 @@ export default function LoginPage() {
             >
               {isLoading
                 ? 'Memproses...'
-                : uiState.isSignUp
+                : isSignUpMode.isOpen
                 ? 'Daftar Akun'
                 : 'Masuk'}
             </Button>
@@ -145,19 +125,13 @@ export default function LoginPage() {
         </CardContent>
         <CardFooter className="justify-center border-t border-zinc-800 p-4 text-center">
           <p className="text-sm text-muted-foreground">
-            {uiState.isSignUp ? 'Sudah punya akun?' : 'Belum punya akun?'}{' '}
+            {isSignUpMode.isOpen ? 'Sudah punya akun?' : 'Belum punya akun?'}{' '}
             <button
               type="button"
-              onClick={() =>
-                setUiState((prev) => ({
-                  ...prev,
-                  isSignUp: !prev.isSignUp,
-                  message: '',
-                }))
-              }
+              onClick={toggleMode}
               className="font-medium text-[#FC580F] hover:underline underline-offset-4"
             >
-              {uiState.isSignUp ? 'Masuk sekarang' : 'Daftar sekarang'}
+              {isSignUpMode.isOpen ? 'Masuk sekarang' : 'Daftar sekarang'}
             </button>
           </p>
         </CardFooter>
