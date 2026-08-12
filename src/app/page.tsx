@@ -292,7 +292,7 @@ export default function DashboardPage() {
             className="h-9 flex items-center gap-1.5 shrink-0 bg-[#FC580F] hover:bg-[#e04c0b] text-white font-medium"
           >
             <Plus className="w-4 h-4" />
-            <span>+ Catat Baru</span>
+            <span>Catat Baru</span>
           </Button>
         </div>
 
@@ -330,7 +330,7 @@ export default function DashboardPage() {
                   modalDisclosure.onOpen()
                 }}
               >
-                + Catat Sekarang
+                <Plus className="w-4 h-4 mr-1.5 inline" /> Catat Sekarang
               </Button>
             </CardContent>
           </Card>
