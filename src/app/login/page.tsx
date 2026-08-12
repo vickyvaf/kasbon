@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Wallet } from 'lucide-react'
+import { Logo } from '@/components/Logo'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -57,9 +57,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md shadow-sm border-zinc-800 bg-zinc-950">
         <CardHeader className="text-center space-y-1">
           <div className="flex justify-center mb-2">
-            <div className="p-3 bg-[#FC580F]/10 rounded-full">
-              <Wallet className="w-6 h-6 text-[#FC580F]" />
-            </div>
+            <Logo size={48} />
           </div>
           <CardTitle className="text-2xl font-bold tracking-tight">Kasbon</CardTitle>
           <CardDescription>

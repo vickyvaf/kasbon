@@ -7,6 +7,7 @@ import { Debt, DebtStatusFilter, DebtTypeFilter } from '@/lib/types'
 import { CreateDebtFormInput } from '@/schemas/debtSchema'
 import { formatRupiah, formatRelativeDate } from '@/lib/formatters'
 import { DebtModal } from '@/components/DebtModal'
+import { Logo } from '@/components/Logo'
 import { useDisclosure } from '@/hooks/useDisclosure'
 import {
   useDebtsQuery,
@@ -152,9 +153,7 @@ export default function DashboardPage() {
       <header className="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="p-2 bg-[#FC580F] text-white rounded-lg">
-              <Wallet className="w-5 h-5" />
-            </div>
+            <Logo size={32} />
             <span className="font-bold text-xl tracking-tight text-white">Kasbon</span>
           </div>
 
