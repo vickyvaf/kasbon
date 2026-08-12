@@ -1,48 +1,75 @@
 # Kasbon — Aplikasi Tracker Utang-Piutang Pribadi
 
-Web aplikasi sederhana untuk mencatat dan mengelola utang-piutang pribadi, dibangun dengan Next.js 16 App Router, Supabase (PostgreSQL + Auth), Tailwind CSS v4, dan shadcn/ui.
+Web aplikasi modern untuk mencatat dan mengelola utang-piutang pribadi, dibangun dengan Next.js 16 App Router, Supabase (PostgreSQL + Auth + RLS), TanStack React Query v5, Tailwind CSS v4, dan shadcn/ui.
 
 ---
 
-## 🚀 Fitur Utama
+## 🚀 Fitur Utama & Pengalaman Pengguna (UX)
 
-1. **Autentikasi Pengguna**: Signup dan Login berbasis Supabase Auth dengan email & password. Proteksi halaman otomatis via Middleware.
-2. **Ringkasan Keuangan (Summary Cards)**:
-   - Total Diutangkan ke Saya (Piutang)
-   - Total Saya Hutang (Utang)
-   - Net Balance (Warna hijau untuk positif, merah untuk negatif)
-3. **Pencatatan & Filter**:
-   - Filter berdasarkan status (Semua / Belum Lunas / Lunas)
-   - Filter berdasarkan tipe (Semua / Di-hutang ke Saya / Saya Hutang)
-   - Pencarian berdasarkan nama orang & catatan
-   - Pengelompokan (Group view) berdasarkan nama orang
-4. **Manajemen Entry (CRUD)**:
-   - Form modal untuk mencatat utang baru dan edit entry
-   - Toggle status **Tandai Lunas** / **Batal Lunas** secara persisten ke database Supabase
-   - Hapus entry utang
-5. **Format & Lokalisasi**:
-   - Format mata uang Rupiah berbasis `id-ID`: `Rp 1.234.000`
-   - Format tanggal relatif: `Hari ini`, `Kemarin`, `3 hari lalu`
-   - Tampilan UI kasual Bahasa Indonesia
+1. **Autentikasi Halaman Terpisah**:
+   - Halaman khusus `/login` dan `/signup` dengan toggle visibilitas password (ikon Eye / EyeOff).
+   - Proteksi route server-side via Supabase SSR Middleware (`proxy.ts`).
+   - Isolasi cache React Query (`queryClient.clear()`) untuk mencegah kebocoran data antar akun pengguna.
+
+2. **Optimistic UI Updates (0ms Latency Response)**:
+   - Pencatatan utang baru, pengubahan status lunas/batal lunas, dan penghapusan entry langsung memperbarui UI secara instant menggunakan TanStack React Query (`onMutate`, `onError`, `onSettled`) dengan fitur rollback otomatis jika terjadi kegagalan server.
+
+3. **Skeleton Loading UI (Zero Layout Shift)**:
+   - Tampilan loading kartu ringkasan (`SummaryCards`) dan daftar utang (`DebtListSkeleton`) menyesuaikan posisi dan dimensi komponen asli untuk mencegah pergeseran tata letak (*layout shift*) saat memuat data.
+
+4. **Debounced Search & Filtering**:
+   - Custom reusable hook `useDebounce` (300ms) untuk input pencarian nama/catatan guna menghindari kalkulasi dan *re-render* yang tidak perlu di setiap ketikan.
+   - Filter status (Semua / Belum Lunas / Lunas) dan tipe (Semua / Di-hutang ke Saya / Saya Hutang).
+   - Mode pengelompokan (Group View) berdasarkan nama orang.
+
+5. **Toast Notifikasi Responsif**:
+   - Notifikasi `sonner` real-time untuk seluruh aksi (Simpan, Edit, Hapus, Login, Signup).
+   - Posisi toast menyesuaikan perangkat: **Kanan Bawah** di desktop (≥768px) dan **Tengah Atas** di tablet/handphone (<768px).
+
+6. **Modal Konfirmasi Hapus UI**:
+   - Dialog konfirmasi khusus (`DeleteConfirmModal`) menggantikan `confirm()` bawaan browser, lengkap dengan ikon peringatan dan nama orang yang bersangkutan.
+
+7. **Format & Lokalisasi**:
+   - Format nominal otomatis saat mengetik input Rupiah (`Rp 50.000`).
+   - Format tanggal relatif Bahasa Indonesia: `Hari ini`, `Kemarin`, `3 hari lalu`.
+   - Palette warna konsisten berbasis variabel *design token* shadcn/ui (`primary`, `ring`, `border`).
 
 ---
 
-## 🛠️ Tech Stack & Library Tambahan
+## 📁 Struktur Komponen Modular
 
-- **Framework**: Next.js 16 (App Router + TypeScript)
-- **Styling**: Tailwind CSS v4 + shadcn/ui (Default neutral theme, tanpa custom gradient)
+Proyek ini menerapkan arsitektur *clean code* dengan memisahkan tampilan ke dalam komponen-komponen terisolasi di folder `src/components/`:
+
+- `Navbar.tsx`: Header navigasi sticky dengan logo Kasbon, email pengguna (`useUserQuery`), dan tombol keluar.
+- `SummaryCards.tsx`: 3 kartu ringkasan keuangan (Piutang, Utang, Saldo Bersih) lengkap dengan state loading skeleton.
+- `FilterBar.tsx`: Baris kontrol pencarian, filter select, toggle grouping, dan tombol "Catat Baru".
+- `DebtListItem.tsx`: Komponen baris catatan utang beserta lencana status dan tombol aksi.
+- `DebtListGrouped.tsx`: Tampilan daftar utang yang terkelompok per nama orang.
+- `DebtListSkeleton.tsx` & `ui/skeleton.tsx`: Komponen skeleton animasi loading.
+- `EmptyState.tsx`: Komponen tampilan kosong saat data belum ada atau filter tidak cocok.
+- `DebtModal.tsx`: Modal dialog form untuk mencatat baru atau mengedit catatan utang.
+- `DeleteConfirmModal.tsx`: Modal dialog konfirmasi penghapusan catatan utang.
+- `AppToaster.tsx`: Provider toast notifications responsif.
+
+---
+
+## 🛠️ Tech Stack & Library Utama
+
+- **Framework**: Next.js 16 (App Router + TypeScript + Turbopack)
+- **State & Data Fetching**: TanStack React Query v5
+- **Styling**: Tailwind CSS v4 + shadcn/ui design tokens
 - **Backend & Database**: Supabase (PostgreSQL + Auth + Row Level Security)
+- **Form & Validasi**: React Hook Form + Zod (`@hookform/resolvers`, `zod`)
+- **Notifikasi**: Sonner (`sonner`)
 - **Icons**: Lucide React (`lucide-react`)
-- **Helper Utilities**: `@supabase/ssr`, `@supabase/supabase-js`, `clsx`, `tailwind-merge`, `class-variance-authority`
-
-*Alasan memakai shadcn/ui & helper utilities*: Menyediakan komponen UI standar (Card, Button, Dialog, Select, Input, Badge) yang accessible, konsisten, dan mudah dipoles tanpa menulis CSS boilerplate dari nol.
+- **Custom Hooks**: `useDebounce`, `useDisclosure`, `useUserQuery`, `useDebtsQuery`, `useCreateDebtMutation`, `useUpdateDebtMutation`, `useDeleteDebtMutation`
 
 ---
 
 ## ⚙️ Setup Lokal & Migrasi Database
 
 ### 1. Prasyarat
-- Node.js 18+ dan npm
+- Node.js 18+ dan pnpm (atau npm)
 - Akun Supabase & project aktif
 
 ### 2. Environment Variables
@@ -89,7 +116,7 @@ CREATE POLICY "Users can delete their own debts" ON public.debts FOR DELETE USIN
 # Install dependencies
 pnpm install
 
-# Jalankan server verifikasi / dev
+# Jalankan server dev
 pnpm dev
 
 # Jalankan build produksi
@@ -102,23 +129,23 @@ Buka [http://localhost:3000](http://localhost:3000) di browser.
 
 ## 🔒 Keamanan & Verifikasi RLS
 
-Row Level Security (RLS) diaktifkan secara ketat di tabel `debts`. Setiap query yang dilakukan pengguna (baik melalui Supabase Client SDK maupun REST API via `curl`) diverifikasi oleh Postgres engine `auth.uid() = user_id`. Pengguna tidak dapat membaca, menambah, mengubah, atau menghapus catatan utang milik pengguna lain.
+Row Level Security (RLS) diaktifkan secara ketat di tabel `debts`. Setiap query yang dilakukan pengguna diverifikasi oleh Postgres engine `auth.uid() = user_id`. Pengguna tidak dapat membaca, menambah, mengubah, atau menghapus catatan utang milik pengguna lain.
 
 ---
 
 ## 🎯 Technical Insights
 
 ### Approach (Keputusan Teknis yang Dibanggakan)
-Penerapan arsitektur API Routes Next.js 16 bertipe ketat (*strict TypeScript*) yang terhubung langsung dengan Supabase SSR Client & Row Level Security (RLS). Seluruh aksi mutasi seperti menandai lunas, mengedit data, dan menghapus entry divalidasi secara komprehensif di server dan di-render secara reaktif tanpa re-fetch penuh yang berat, menjaga performa dan integritas data secara mutlak.
+Penerapan arsitektur React Query Optimistic Updates yang dipadukan dengan modal UI non-blocking (0ms latensi) dan penataan komponen modular. Pengalaman pengguna terasa sangat cepat, tanpa *layout shift* berkat skeleton UI, serta terlindungi oleh Supabase Auth & RLS.
 
 ### Trade-off (Hal yang Dipoles jika Memiliki Waktu Tambahan)
-Jika memiliki 1 hari tambahan, saya akan menambahkan grafik analisis tren utang-piutang dari waktu ke waktu (visualisai Chart.js/Recharts), fitur ekspor laporan ke PDF/Excel, serta integrasi pengingat otomatis via email/WhatsApp saat tanggal jatuh tempo mendekat.
+Jika memiliki 1 hari tambahan, saya akan menambahkan grafik analisis tren utang-piutang dari waktu ke waktu (visualisasi Chart.js/Recharts), fitur ekspor laporan ke PDF/Excel, serta integrasi pengingat otomatis via email/WhatsApp saat tanggal jatuh tempo mendekat.
 
 ### Time Spent
-**Durasi Pengerjaan**: ~3.5 Jam (Inisialisasi project, setup Supabase Auth & RLS, pembuatan API endpoints bertipe ketat, integrasi UI shadcn/ui, pengujian fitur, dan penulisan dokumentasi).
+**Durasi Pengerjaan**: ~4 Jam (Inisialisasi project, setup Supabase Auth & RLS, pembuatan API endpoints, arsitektur React Query optimistic updates, refactoring komponen modular, integrasi Skeleton & Toast UI, pengujian fitur, dan dokumentasi).
 
 ---
 
 ## 🔗 Links
 
-- **Demo Deployment**: [Kasbon on Vercel](https://task-kasbon.vercel.app) *(Isi link deployment Vercel Anda setelah deploy)*
+- **Demo Deployment**: [Kasbon on Vercel](https://task-kasbon.vercel.app)
