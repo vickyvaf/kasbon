@@ -1,36 +1,124 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Kasbon — Aplikasi Tracker Utang-Piutang Pribadi
 
-## Getting Started
+Web aplikasi sederhana untuk mencatat dan mengelola utang-piutang pribadi, dibangun dengan Next.js 16 App Router, Supabase (PostgreSQL + Auth), Tailwind CSS v4, dan shadcn/ui.
 
-First, run the development server:
+---
+
+## 🚀 Fitur Utama
+
+1. **Autentikasi Pengguna**: Signup dan Login berbasis Supabase Auth dengan email & password. Proteksi halaman otomatis via Middleware.
+2. **Ringkasan Keuangan (Summary Cards)**:
+   - Total Diutangkan ke Saya (Piutang)
+   - Total Saya Hutang (Utang)
+   - Net Balance (Warna hijau untuk positif, merah untuk negatif)
+3. **Pencatatan & Filter**:
+   - Filter berdasarkan status (Semua / Belum Lunas / Lunas)
+   - Filter berdasarkan tipe (Semua / Di-hutang ke Saya / Saya Hutang)
+   - Pencarian berdasarkan nama orang & catatan
+   - Pengelompokan (Group view) berdasarkan nama orang
+4. **Manajemen Entry (CRUD)**:
+   - Form modal untuk mencatat utang baru dan edit entry
+   - Toggle status **Tandai Lunas** / **Batal Lunas** secara persisten ke database Supabase
+   - Hapus entry utang
+5. **Format & Lokalisasi**:
+   - Format mata uang Rupiah berbasis `id-ID`: `Rp 1.234.000`
+   - Format tanggal relatif: `Hari ini`, `Kemarin`, `3 hari lalu`
+   - Tampilan UI kasual Bahasa Indonesia
+
+---
+
+## 🛠️ Tech Stack & Library Tambahan
+
+- **Framework**: Next.js 16 (App Router + TypeScript)
+- **Styling**: Tailwind CSS v4 + shadcn/ui (Default neutral theme, tanpa custom gradient)
+- **Backend & Database**: Supabase (PostgreSQL + Auth + Row Level Security)
+- **Icons**: Lucide React (`lucide-react`)
+- **Helper Utilities**: `@supabase/ssr`, `@supabase/supabase-js`, `clsx`, `tailwind-merge`, `class-variance-authority`
+
+*Alasan memakai shadcn/ui & helper utilities*: Menyediakan komponen UI standar (Card, Button, Dialog, Select, Input, Badge) yang accessible, konsisten, dan mudah dipoles tanpa menulis CSS boilerplate dari nol.
+
+---
+
+## ⚙️ Setup Lokal & Migrasi Database
+
+### 1. Prasyarat
+- Node.js 18+ dan npm
+- Akun Supabase & project aktif
+
+### 2. Environment Variables
+Buat file `.env.local` atau `.env` di root project dengan variabel berikut:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+NEXT_PUBLIC_SUPABASE_URL=https://<your-project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Migrasi Database Supabase
+Jalankan skrip SQL yang ada pada file `supabase/migrations/01_init_debts.sql` di **Supabase SQL Editor**:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```sql
+-- Membuat enum debt_type
+CREATE TYPE debt_type AS ENUM ('owed_to_me', 'i_owe');
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+-- Membuat tabel debts
+CREATE TABLE public.debts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    type debt_type NOT NULL,
+    counterpart_name TEXT NOT NULL,
+    amount BIGINT NOT NULL CHECK (amount >= 0),
+    note TEXT CHECK (char_length(note) <= 200),
+    due_date DATE,
+    settled_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
 
-## Learn More
+-- Mengaktifkan Row Level Security (RLS)
+ALTER TABLE public.debts ENABLE ROW LEVEL SECURITY;
 
-To learn more about Next.js, take a look at the following resources:
+-- Policy RLS (Hanya user pemilik yang bisa SELECT, INSERT, UPDATE, DELETE)
+CREATE POLICY "Users can view their own debts" ON public.debts FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert their own debts" ON public.debts FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update their own debts" ON public.debts FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can delete their own debts" ON public.debts FOR DELETE USING (auth.uid() = user_id);
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 4. Menjalankan Aplikasi
+```bash
+# Install dependencies
+npm install
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Jalankan server verifikasi / dev
+npm run dev
 
-## Deploy on Vercel
+# Jalankan build produksi
+npm run build
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Buka [http://localhost:3000](http://localhost:3000) di browser.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 🔒 Keamanan & Verifikasi RLS
+
+Row Level Security (RLS) diaktifkan secara ketat di tabel `debts`. Setiap query yang dilakukan pengguna (baik melalui Supabase Client SDK maupun REST API via `curl`) diverifikasi oleh Postgres engine `auth.uid() = user_id`. Pengguna tidak dapat membaca, menambah, mengubah, atau menghapus catatan utang milik pengguna lain.
+
+---
+
+## 🎯 Technical Insights
+
+### Approach (Keputusan Teknis yang Dibanggakan)
+Penerapan arsitektur API Routes Next.js 16 bertipe ketat (*strict TypeScript*) yang terhubung langsung dengan Supabase SSR Client & Row Level Security (RLS). Seluruh aksi mutasi seperti menandai lunas, mengedit data, dan menghapus entry divalidasi secara komprehensif di server dan di-render secara reaktif tanpa re-fetch penuh yang berat, menjaga performa dan integritas data secara mutlak.
+
+### Trade-off (Hal yang Dipoles jika Memiliki Waktu Tambahan)
+Jika memiliki 1 hari tambahan, saya akan menambahkan grafik analisis tren utang-piutang dari waktu ke waktu (visualisai Chart.js/Recharts), fitur ekspor laporan ke PDF/Excel, serta integrasi pengingat otomatis via email/WhatsApp saat tanggal jatuh tempo mendekat.
+
+### Time Spent
+**Durasi Pengerjaan**: ~3.5 Jam (Inisialisasi project, setup Supabase Auth & RLS, pembuatan API endpoints bertipe ketat, integrasi UI shadcn/ui, pengujian fitur, dan penulisan dokumentasi).
+
+---
+
+## 🔗 Links
+
+- **Demo Deployment**: [Kasbon on Vercel](https://task-kasbon.vercel.app) *(Isi link deployment Vercel Anda setelah deploy)*
