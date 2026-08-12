@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { UpdateDebtInput } from '@/lib/types'
+import { updateDebtSchema } from '@/schemas/debtSchema'
 
 export async function PATCH(
   request: NextRequest,
@@ -18,36 +18,18 @@ export async function PATCH(
       )
     }
 
-    const body: UpdateDebtInput = await request.json()
+    const rawBody = await request.json()
+    const parseResult = updateDebtSchema.safeParse(rawBody)
 
-    // Validate if present
-    if (body.type && !['owed_to_me', 'i_owe'].includes(body.type)) {
+    if (!parseResult.success) {
+      const firstErrorMessage = parseResult.error.issues[0]?.message || 'Input data tidak valid.'
       return NextResponse.json(
-        { error: 'Tipe utang tidak valid.' },
+        { error: firstErrorMessage },
         { status: 400 }
       )
     }
 
-    if (body.counterpart_name !== undefined && body.counterpart_name.trim() === '') {
-      return NextResponse.json(
-        { error: 'Nama orang tidak boleh kosong.' },
-        { status: 400 }
-      )
-    }
-
-    if (body.amount !== undefined && (typeof body.amount !== 'number' || body.amount <= 0 || isNaN(body.amount))) {
-      return NextResponse.json(
-        { error: 'Jumlah harus berupa angka lebih besar dari 0.' },
-        { status: 400 }
-      )
-    }
-
-    if (body.note && body.note.length > 200) {
-      return NextResponse.json(
-        { error: 'Catatan maksimum 200 karakter.' },
-        { status: 400 }
-      )
-    }
+    const body = parseResult.data
 
     const updatePayload: Record<string, unknown> = {}
     if (body.type) updatePayload.type = body.type

@@ -1,11 +1,18 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Debt, DebtStatusFilter, DebtTypeFilter, CreateDebtInput } from '@/lib/types'
+import { Debt, DebtStatusFilter, DebtTypeFilter } from '@/lib/types'
+import { CreateDebtFormInput } from '@/schemas/debtSchema'
 import { formatRupiah, formatRelativeDate } from '@/lib/formatters'
 import { DebtModal } from '@/components/DebtModal'
+import {
+  useDebtsQuery,
+  useCreateDebtMutation,
+  useUpdateDebtMutation,
+  useDeleteDebtMutation,
+} from '@/hooks/useDebts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -30,6 +37,7 @@ import {
   Search,
   Users,
   ListFilter,
+  AlertCircle,
 } from 'lucide-react'
 
 export default function DashboardPage() {
@@ -37,11 +45,8 @@ export default function DashboardPage() {
   const supabase = createClient()
 
   const [userEmail, setUserEmail] = useState<string>('')
-  const [debts, setDebts] = useState<Debt[]>([])
-  const [loading, setLoading] = useState(true)
-  const [errorMsg, setErrorMsg] = useState('')
 
-  // Filters & Controls
+  // Filters & Search
   const [statusFilter, setStatusFilter] = useState<DebtStatusFilter>('all')
   const [typeFilter, setTypeFilter] = useState<DebtTypeFilter>('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -51,33 +56,13 @@ export default function DashboardPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingDebt, setEditingDebt] = useState<Debt | null>(null)
 
-  // Fetch debts from API or Supabase
-  const fetchDebts = useCallback(async () => {
-    setLoading(true)
-    setErrorMsg('')
-    try {
-      const queryParams = new URLSearchParams()
-      if (statusFilter !== 'all') queryParams.set('status', statusFilter)
-      if (typeFilter !== 'all') queryParams.set('type', typeFilter)
+  // React Query Custom Hooks
+  const { data: debts = [], isLoading, isError, error } = useDebtsQuery(statusFilter, typeFilter)
+  const createMutation = useCreateDebtMutation()
+  const updateMutation = useUpdateDebtMutation()
+  const deleteMutation = useDeleteDebtMutation()
 
-      const res = await fetch(`/api/debts?${queryParams.toString()}`)
-      const json = await res.json()
-
-      if (!res.ok) {
-        throw new Error(json.error || 'Gagal memuat catatan utang.')
-      }
-
-      setDebts(json.data || [])
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setErrorMsg(err.message)
-      }
-    } finally {
-      setLoading(false)
-    }
-  }, [statusFilter, typeFilter])
-
-  // Check auth user session
+  // Auth user session check
   useEffect(() => {
     async function checkAuth() {
       const { data: { user } } = await supabase.auth.getUser()
@@ -86,10 +71,9 @@ export default function DashboardPage() {
         return
       }
       setUserEmail(user.email || '')
-      fetchDebts()
     }
     checkAuth()
-  }, [supabase, router, fetchDebts])
+  }, [supabase, router])
 
   // Handle Logout
   async function handleLogout() {
@@ -99,62 +83,32 @@ export default function DashboardPage() {
   }
 
   // Handle Save (Create / Update)
-  async function handleSaveDebt(data: CreateDebtInput, id?: string) {
+  async function handleSaveDebt(formData: CreateDebtFormInput, id?: string) {
     if (id) {
-      // Update existing
-      const res = await fetch(`/api/debts/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error || 'Gagal mengedit data.')
+      await updateMutation.mutateAsync({ id, data: formData })
     } else {
-      // Create new
-      const res = await fetch('/api/debts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error || 'Gagal menambahkan data.')
+      await createMutation.mutateAsync(formData)
     }
-    fetchDebts()
+    setIsModalOpen(false)
+    setEditingDebt(null)
   }
 
   // Handle Toggle Settled
   async function handleToggleSettled(debt: Debt) {
     const newSettledAt = debt.settled_at ? null : new Date().toISOString()
-    try {
-      const res = await fetch(`/api/debts/${debt.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ settled_at: newSettledAt }),
-      })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error || 'Gagal mengubah status lunas.')
-      fetchDebts()
-    } catch (err: unknown) {
-      if (err instanceof Error) alert(err.message)
-    }
+    await updateMutation.mutateAsync({
+      id: debt.id,
+      data: { settled_at: newSettledAt },
+    })
   }
 
   // Handle Delete
   async function handleDeleteDebt(id: string) {
     if (!confirm('Apakah Anda yakin ingin menghapus catatan ini?')) return
-    try {
-      const res = await fetch(`/api/debts/${id}`, {
-        method: 'DELETE',
-      })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error || 'Gagal menghapus catatan.')
-      fetchDebts()
-    } catch (err: unknown) {
-      if (err instanceof Error) alert(err.message)
-    }
+    await deleteMutation.mutateAsync(id)
   }
 
-  // Calculations for Summary Cards
+  // Summary Calculations
   const totalOwedToMe = debts
     .filter((d) => d.type === 'owed_to_me' && !d.settled_at)
     .reduce((sum, d) => sum + d.amount, 0)
@@ -165,13 +119,14 @@ export default function DashboardPage() {
 
   const netBalance = totalOwedToMe - totalIOwe
 
-  // Filtered by Search Query
-  const filteredDebts = debts.filter((debt) =>
-    debt.counterpart_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (debt.note && debt.note.toLowerCase().includes(searchQuery.toLowerCase()))
+  // Search Filtering
+  const filteredDebts = debts.filter(
+    (debt) =>
+      debt.counterpart_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (debt.note && debt.note.toLowerCase().includes(searchQuery.toLowerCase()))
   )
 
-  // Grouped debts logic (Bonus)
+  // Grouped Debts Logic
   const groupedDebts = filteredDebts.reduce((acc, debt) => {
     const key = debt.counterpart_name.trim().toLowerCase()
     if (!acc[key]) {
@@ -185,9 +140,11 @@ export default function DashboardPage() {
     return acc
   }, {} as Record<string, { name: string; totalOwedToMe: number; totalIOwe: number; items: Debt[] }>)
 
+  const isSubmitting = createMutation.isPending || updateMutation.isPending
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
-      {/* Top Navbar */}
+      {/* Navbar */}
       <header className="border-b bg-white dark:bg-slate-900 sticky top-0 z-10 shadow-sm">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -265,7 +222,6 @@ export default function DashboardPage() {
 
         {/* Action & Filter Bar */}
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-lg border shadow-sm">
-          {/* Filters Group */}
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative flex-1 min-w-[160px]">
               <Search className="w-4 h-4 absolute left-2.5 top-3 text-muted-foreground" />
@@ -317,7 +273,6 @@ export default function DashboardPage() {
             </Button>
           </div>
 
-          {/* Add Button */}
           <Button
             onClick={() => {
               setEditingDebt(null)
@@ -330,17 +285,18 @@ export default function DashboardPage() {
           </Button>
         </div>
 
-        {/* Error Notification */}
-        {errorMsg && (
-          <div className="p-4 text-sm rounded border border-red-200 bg-red-50 text-red-700 dark:bg-red-950 dark:border-red-900 dark:text-red-300">
-            {errorMsg}
+        {/* Error Notification via React Query isError */}
+        {isError && (
+          <div className="p-4 text-sm rounded border border-red-200 bg-red-50 text-red-700 dark:bg-red-950 dark:border-red-900 dark:text-red-300 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{error instanceof Error ? error.message : 'Terjadi kesalahan saat memuat data.'}</span>
           </div>
         )}
 
-        {/* Entry List or Grouped View */}
-        {loading ? (
+        {/* List Content using React Query isLoading state */}
+        {isLoading ? (
           <div className="text-center py-12 text-muted-foreground text-sm">
-            Memuat data catatan...
+            Memuat data catatan utang...
           </div>
         ) : filteredDebts.length === 0 ? (
           <Card className="text-center py-12">
@@ -429,7 +385,7 @@ export default function DashboardPage() {
         )}
       </main>
 
-      {/* Add / Edit Modal */}
+      {/* Modal Form */}
       <DebtModal
         isOpen={isModalOpen}
         onClose={() => {
@@ -438,6 +394,7 @@ export default function DashboardPage() {
         }}
         onSave={handleSaveDebt}
         initialData={editingDebt}
+        isLoading={isSubmitting}
       />
     </div>
   )

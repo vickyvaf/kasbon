@@ -1,7 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Debt, CreateDebtInput } from '@/lib/types'
+import { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Debt } from '@/lib/types'
+import { createDebtSchema, CreateDebtFormInput } from '@/schemas/debtSchema'
 import {
   Dialog,
   DialogContent,
@@ -17,77 +20,65 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 interface DebtModalProps {
   isOpen: boolean
   onClose: () => void
-  onSave: (data: CreateDebtInput, id?: string) => Promise<void>
+  onSave: (data: CreateDebtFormInput, id?: string) => Promise<void>
   initialData?: Debt | null
+  isLoading?: boolean
 }
 
-export function DebtModal({ isOpen, onClose, onSave, initialData }: DebtModalProps) {
-  const [type, setType] = useState<'owed_to_me' | 'i_owe'>('owed_to_me')
-  const [counterpartName, setCounterpartName] = useState('')
-  const [amount, setAmount] = useState('')
-  const [dueDate, setDueDate] = useState('')
-  const [note, setNote] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [errorMsg, setErrorMsg] = useState('')
+export function DebtModal({
+  isOpen,
+  onClose,
+  onSave,
+  initialData,
+  isLoading = false,
+}: DebtModalProps) {
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<CreateDebtFormInput>({
+    resolver: zodResolver(createDebtSchema),
+    defaultValues: {
+      type: 'owed_to_me',
+      counterpart_name: '',
+      amount: undefined,
+      due_date: new Date().toISOString().split('T')[0],
+      note: '',
+    },
+  })
+
+  const selectedType = watch('type')
+  const noteValue = watch('note') || ''
 
   useEffect(() => {
     if (initialData) {
-      setType(initialData.type)
-      setCounterpartName(initialData.counterpart_name)
-      setAmount(initialData.amount.toString())
-      setDueDate(initialData.due_date || new Date().toISOString().split('T')[0])
-      setNote(initialData.note || '')
+      reset({
+        type: initialData.type,
+        counterpart_name: initialData.counterpart_name,
+        amount: initialData.amount,
+        due_date: initialData.due_date || new Date().toISOString().split('T')[0],
+        note: initialData.note || '',
+      })
     } else {
-      setType('owed_to_me')
-      setCounterpartName('')
-      setAmount('')
-      setDueDate(new Date().toISOString().split('T')[0])
-      setNote('')
+      reset({
+        type: 'owed_to_me',
+        counterpart_name: '',
+        amount: undefined,
+        due_date: new Date().toISOString().split('T')[0],
+        note: '',
+      })
     }
-    setErrorMsg('')
-  }, [initialData, isOpen])
+  }, [initialData, isOpen, reset])
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setErrorMsg('')
-
-    if (!counterpartName.trim()) {
-      setErrorMsg('Nama orang wajib diisi.')
-      return
-    }
-
-    const numAmount = Number(amount)
-    if (isNaN(numAmount) || numAmount <= 0) {
-      setErrorMsg('Jumlah harus berupa angka lebih besar dari 0.')
-      return
-    }
-
-    if (note.length > 200) {
-      setErrorMsg('Catatan maksimum 200 karakter.')
-      return
-    }
-
-    setLoading(true)
+  async function onSubmit(data: CreateDebtFormInput) {
     try {
-      await onSave(
-        {
-          type,
-          counterpart_name: counterpartName,
-          amount: numAmount,
-          due_date: dueDate || null,
-          note: note || null,
-        },
-        initialData?.id
-      )
+      await onSave(data, initialData?.id)
       onClose()
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setErrorMsg(err.message)
-      } else {
-        setErrorMsg('Gagal menyimpan data.')
-      }
-    } finally {
-      setLoading(false)
+    } catch {
+      // Error handled by parent / hook
     }
   }
 
@@ -100,18 +91,14 @@ export function DebtModal({ isOpen, onClose, onSave, initialData }: DebtModalPro
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 py-2">
-          {errorMsg && (
-            <div className="p-3 text-sm rounded border border-red-200 bg-red-50 text-red-700 dark:bg-red-950 dark:border-red-900 dark:text-red-300">
-              {errorMsg}
-            </div>
-          )}
-
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2">
           <div className="space-y-2">
             <Label>Tipe Utang</Label>
             <RadioGroup
-              value={type}
-              onValueChange={(val) => setType(val as 'owed_to_me' | 'i_owe')}
+              value={selectedType}
+              onValueChange={(val) =>
+                setValue('type', val as 'owed_to_me' | 'i_owe')
+              }
               className="flex space-x-4 pt-1"
             >
               <div className="flex items-center space-x-2">
@@ -127,6 +114,9 @@ export function DebtModal({ isOpen, onClose, onSave, initialData }: DebtModalPro
                 </Label>
               </div>
             </RadioGroup>
+            {errors.type && (
+              <p className="text-xs text-red-500">{errors.type.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -134,10 +124,13 @@ export function DebtModal({ isOpen, onClose, onSave, initialData }: DebtModalPro
             <Input
               id="counterpart"
               placeholder="Contoh: Budi"
-              value={counterpartName}
-              onChange={(e) => setCounterpartName(e.target.value)}
-              required
+              {...register('counterpart_name')}
             />
+            {errors.counterpart_name && (
+              <p className="text-xs text-red-500">
+                {errors.counterpart_name.message}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -147,10 +140,11 @@ export function DebtModal({ isOpen, onClose, onSave, initialData }: DebtModalPro
               type="number"
               min="1"
               placeholder="Contoh: 50000"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              required
+              {...register('amount', { valueAsNumber: true })}
             />
+            {errors.amount && (
+              <p className="text-xs text-red-500">{errors.amount.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -158,33 +152,42 @@ export function DebtModal({ isOpen, onClose, onSave, initialData }: DebtModalPro
             <Input
               id="dueDate"
               type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
+              {...register('due_date')}
             />
+            {errors.due_date && (
+              <p className="text-xs text-red-500">{errors.due_date.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
             <div className="flex justify-between">
               <Label htmlFor="note">Catatan (Opsional)</Label>
               <span className="text-xs text-muted-foreground">
-                {note.length}/200
+                {noteValue.length}/200
               </span>
             </div>
             <Input
               id="note"
               placeholder="Catatan singkat..."
               maxLength={200}
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
+              {...register('note')}
             />
+            {errors.note && (
+              <p className="text-xs text-red-500">{errors.note.message}</p>
+            )}
           </div>
 
           <DialogFooter className="pt-2">
-            <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isLoading}
+            >
               Batal
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Menyimpan...' : 'Simpan'}
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'Menyimpan...' : 'Simpan'}
             </Button>
           </DialogFooter>
         </form>

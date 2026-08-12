@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { CreateDebtInput } from '@/lib/types'
+import { createDebtSchema } from '@/schemas/debtSchema'
 
 export async function GET(request: NextRequest) {
   try {
@@ -64,35 +64,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const body: CreateDebtInput = await request.json()
+    const rawBody = await request.json()
+    const parseResult = createDebtSchema.safeParse(rawBody)
 
-    if (!body.type || !['owed_to_me', 'i_owe'].includes(body.type)) {
+    if (!parseResult.success) {
+      const firstErrorMessage = parseResult.error.issues[0]?.message || 'Input data tidak valid.'
       return NextResponse.json(
-        { error: 'Tipe utang harus dipilih (di-hutang / hutang).' },
+        { error: firstErrorMessage },
         { status: 400 }
       )
     }
 
-    if (!body.counterpart_name || body.counterpart_name.trim() === '') {
-      return NextResponse.json(
-        { error: 'Nama orang wajib diisi.' },
-        { status: 400 }
-      )
-    }
-
-    if (typeof body.amount !== 'number' || body.amount <= 0 || isNaN(body.amount)) {
-      return NextResponse.json(
-        { error: 'Jumlah harus berupa angka lebih besar dari 0.' },
-        { status: 400 }
-      )
-    }
-
-    if (body.note && body.note.length > 200) {
-      return NextResponse.json(
-        { error: 'Catatan maksimum 200 karakter.' },
-        { status: 400 }
-      )
-    }
+    const body = parseResult.data
 
     const { data, error } = await supabase
       .from('debts')
