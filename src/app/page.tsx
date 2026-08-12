@@ -9,6 +9,7 @@ import { formatRupiah, formatRelativeDate } from '@/lib/formatters'
 import { DebtModal } from '@/components/DebtModal'
 import { Logo } from '@/components/Logo'
 import { useDisclosure } from '@/hooks/useDisclosure'
+import { useDebounce } from '@/hooks/useDebounce'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   useDebtsQuery,
@@ -140,11 +141,13 @@ export default function DashboardPage() {
 
   const netBalance = totalOwedToMe - totalIOwe
 
+  const debouncedSearch = useDebounce(filters.search, 300)
+
   // Search Filtering
   const filteredDebts = debts.filter(
     (debt) =>
-      debt.counterpart_name.toLowerCase().includes(filters.search.toLowerCase()) ||
-      (debt.note && debt.note.toLowerCase().includes(filters.search.toLowerCase()))
+      debt.counterpart_name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      (debt.note && debt.note.toLowerCase().includes(debouncedSearch.toLowerCase()))
   )
 
   // Grouped Debts Logic
