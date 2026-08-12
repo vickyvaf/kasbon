@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import { Debt } from '@/lib/types'
 import { formatRupiah, formatRelativeDate } from '@/lib/formatters'
 import { Badge } from '@/components/ui/badge'
@@ -14,7 +15,7 @@ interface DebtListItemProps {
 function getDueDateBadge(dueDate?: string | null, isSettled?: boolean) {
   if (isSettled || !dueDate) return null
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = dayjs().format('YYYY-MM-DD')
   if (dueDate < today) {
     return (
       <Badge variant="outline" className="text-[11px] font-normal bg-rose-950/60 text-rose-400 border-rose-800/80 flex items-center gap-1 shrink-0">

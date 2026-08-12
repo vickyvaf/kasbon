@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import { Debt } from '@/lib/types'
 
 export function exportDebtsToCsv(debts: Debt[]) {
@@ -18,7 +19,7 @@ export function exportDebtsToCsv(debts: Debt[]) {
     `"${d.type === 'owed_to_me' ? 'Saya dihutang (Piutang)' : 'Saya hutang (Utang)'}"`,
     d.amount,
     `"${d.settled_at ? 'Lunas' : 'Belum Lunas'}"`,
-    `"${new Date(d.created_at).toLocaleDateString('id-ID')}"`,
+    `"${dayjs(d.created_at).format('DD/MM/YYYY')}"`,
     `"${d.due_date ? d.due_date : '-'}"`,
     `"${(d.note || '').replace(/"/g, '""')}"`,
   ])
@@ -30,7 +31,7 @@ export function exportDebtsToCsv(debts: Debt[]) {
   const encodedUri = encodeURI(csvContent)
   const link = document.createElement('a')
   link.setAttribute('href', encodedUri)
-  link.setAttribute('download', `catatan-kasbon-${new Date().toISOString().split('T')[0]}.csv`)
+  link.setAttribute('download', `catatan-kasbon-${dayjs().format('YYYY-MM-DD')}.csv`)
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)

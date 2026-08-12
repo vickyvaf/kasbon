@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import { Debt } from '@/lib/types'
 import { formatRupiah } from '@/lib/formatters'
 
@@ -76,7 +77,7 @@ export function generateReminderEmailHtml({
 
           <div style="margin-top: 32px; padding-top: 18px; border-top: 1px solid #27272a; text-align: center; font-size: 12px; color: #71717a;">
             Email pengingat dikirim otomatis dari sistem Kasbon.<br/>
-            &copy; ${new Date().getFullYear()} Kasbon Tracker.
+            &copy; ${dayjs().format('YYYY')} Kasbon Tracker.
           </div>
         </div>
       </body>

@@ -1,5 +1,6 @@
 'use client'
 
+import dayjs from 'dayjs'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -43,7 +44,7 @@ export function DebtModal({
       type: 'owed_to_me',
       counterpart_name: '',
       amount: undefined,
-      due_date: new Date().toISOString().split('T')[0],
+      due_date: dayjs().format('YYYY-MM-DD'),
       note: '',
     },
   })
@@ -58,7 +59,7 @@ export function DebtModal({
         type: initialData.type,
         counterpart_name: initialData.counterpart_name,
         amount: initialData.amount,
-        due_date: initialData.due_date || new Date().toISOString().split('T')[0],
+        due_date: initialData.due_date || dayjs().format('YYYY-MM-DD'),
         note: initialData.note || '',
       })
     } else {
@@ -66,7 +67,7 @@ export function DebtModal({
         type: 'owed_to_me',
         counterpart_name: '',
         amount: undefined,
-        due_date: new Date().toISOString().split('T')[0],
+        due_date: dayjs().format('YYYY-MM-DD'),
         note: '',
       })
     }

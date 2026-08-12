@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Debt, DebtStatusFilter, DebtTypeFilter } from '@/lib/types'
@@ -36,10 +37,10 @@ export function useCreateDebtMutation() {
         counterpart_name: newDebtInput.counterpart_name,
         amount: newDebtInput.amount,
         note: newDebtInput.note || null,
-        due_date: newDebtInput.due_date || new Date().toISOString().split('T')[0],
+        due_date: newDebtInput.due_date || dayjs().format('YYYY-MM-DD'),
         settled_at: null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        created_at: dayjs().toISOString(),
+        updated_at: dayjs().toISOString(),
       }
 
       queryClient.setQueriesData<Debt[]>({ queryKey: ['debts'] }, (oldData) => {
@@ -89,7 +90,7 @@ export function useUpdateDebtMutation() {
                   : item.counterpart_name,
               amount:
                 updateInput.amount !== undefined ? updateInput.amount : item.amount,
-              updated_at: new Date().toISOString(),
+              updated_at: dayjs().toISOString(),
             }
           }
           return item

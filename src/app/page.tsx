@@ -1,5 +1,6 @@
 'use client'
 
+import dayjs from 'dayjs'
 import { useState } from 'react'
 import { Debt, DebtStatusFilter, DebtTypeFilter } from '@/lib/types'
 import { CreateDebtFormInput } from '@/schemas/debtSchema'
@@ -52,7 +53,7 @@ export default function DashboardPage() {
   }
 
   function handleToggleSettled(debt: Debt) {
-    const newSettledAt = debt.settled_at ? null : new Date().toISOString()
+    const newSettledAt = debt.settled_at ? null : dayjs().toISOString()
     updateMutation.mutate({
       id: debt.id,
       data: { settled_at: newSettledAt },

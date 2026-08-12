@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import dayjs from 'dayjs'
 import { createClient } from '@/lib/supabase/server'
 import { createDebtSchema } from '@/schemas/debtSchema'
 
@@ -85,7 +86,7 @@ export async function POST(request: NextRequest) {
         counterpart_name: body.counterpart_name.trim(),
         amount: Math.round(body.amount),
         note: body.note ? body.note.trim() : null,
-        due_date: body.due_date || new Date().toISOString().split('T')[0],
+        due_date: body.due_date || dayjs().format('YYYY-MM-DD'),
       })
       .select()
       .single()
