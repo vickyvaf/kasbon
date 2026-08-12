@@ -64,6 +64,14 @@ Proyek ini menerapkan arsitektur *clean code* dengan memisahkan tampilan ke dala
 - **Icons**: Lucide React (`lucide-react`)
 - **Custom Hooks**: `useDebounce`, `useDisclosure`, `useUserQuery`, `useDebtsQuery`, `useCreateDebtMutation`, `useUpdateDebtMutation`, `useDeleteDebtMutation`
 
+### 💡 Alasan Pemilihan Tech Stack & Library:
+- **Next.js 16 & TypeScript**: Memberikan performa render cepat, *type-safety* mutlak, serta pengamanan route berbasis server via middleware (`proxy.ts`).
+- **TanStack React Query v5**: Memungkinkan manajemen cache otomatis, isolasi data per akun pengguna, dan fitur *Optimistic Updates* (0ms respon) dengan fitur rollback jika server gagal.
+- **Supabase (PostgreSQL + Auth + RLS)**: Solusi database terstruktur yang dilengkapi autentikasi bawaan dan proteksi data tingkat database via Row Level Security.
+- **Tailwind CSS v4 + shadcn/ui**: Menyediakan komponen UI standar (*accessible* & konsisten) yang hemat waktu tanpa menulis CSS *boilerplate* dari nol.
+- **React Hook Form + Zod**: Penanganan form dan validasi skema yang sangat efisien tanpa re-render berlebihan saat mengetik.
+- **Sonner**: Toast notification modern yang ringan dan mudah dikonfigurasi secara responsif (mobile & desktop).
+
 ---
 
 ## ⚙️ Setup Lokal & Migrasi Database
