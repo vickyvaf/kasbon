@@ -20,7 +20,6 @@ Web aplikasi sederhana untuk mencatat dan mengelola utang-piutang pribadi, diban
 - ✅ **UX States**: Handling lengkap untuk *Empty State*, *Loading Skeleton UI* (zero layout shift), dan *Error State*.
 - ✅ **Mobile-First Design**: Tampilan UI responsif enak di HP dengan toast notification responsif (`sonner`).
 - ✅ **Modal Hapus UI**: Dialog konfirmasi hapus khusus (`DeleteConfirmModal`) tanpa `confirm()` browser native.
-- ✅ **Ekspor CSV**: Tombol instan unduh laporan catatan utang ke berkas `.csv`.
 
 ---
 
@@ -79,7 +78,7 @@ Penerapan arsitektur **TanStack React Query Optimistic Updates** yang dipadukan 
 ---
 
 ## 🛠️ Trade-off (Kalau Ada 1 Hari Lagi, Apa yang Dipoles?)
-Jika memiliki 1 hari tambahan, saya akan menambahkan sistem pengingat email otomatis via Supabase Edge Functions / Cron Job yang akan mengirimi email notifikasi kepada pengguna 1 hari sebelum tanggal jatuh tempo utang mendekat.
+Jika memiliki 1 hari tambahan, saya akan menambahkan fitur ekspor laporan berkas ke CSV/PDF serta sistem pengingat email otomatis via Cron Job 1 hari sebelum tanggal jatuh tempo utang mendekat.
 
 ---
 
