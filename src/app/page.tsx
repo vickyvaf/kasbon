@@ -15,6 +15,7 @@ import { DebtListItem } from '@/components/DebtListItem'
 import { DebtListGrouped } from '@/components/DebtListGrouped'
 import { useDisclosure } from '@/hooks/useDisclosure'
 import { useDebounce } from '@/hooks/useDebounce'
+import { exportDebtsToCsv } from '@/lib/exportToCsv'
 import {
   useDebtsQuery,
   useCreateDebtMutation,
@@ -122,6 +123,7 @@ export default function DashboardPage() {
           groupByPerson={filters.groupByPerson}
           onToggleGroupByPerson={() => setFilters((prev) => ({ ...prev, groupByPerson: !prev.groupByPerson }))}
           onCreateClick={() => modalDisclosure.onOpen()}
+          onExportClick={() => exportDebtsToCsv(filteredDebts)}
         />
 
         {isError && (

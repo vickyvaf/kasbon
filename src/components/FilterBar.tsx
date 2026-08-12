@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Search, Users, Plus } from 'lucide-react'
+import { Search, Users, Plus, Download } from 'lucide-react'
 
 const STATUS_LABELS: Record<DebtStatusFilter, string> = {
   all: 'Semua Status',
@@ -32,6 +32,7 @@ interface FilterBarProps {
   groupByPerson: boolean
   onToggleGroupByPerson: () => void
   onCreateClick: () => void
+  onExportClick?: () => void
 }
 
 export function FilterBar({
@@ -44,6 +45,7 @@ export function FilterBar({
   groupByPerson,
   onToggleGroupByPerson,
   onCreateClick,
+  onExportClick,
 }: FilterBarProps) {
   return (
     <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between bg-zinc-950 p-4 rounded-lg border border-zinc-800">
@@ -98,13 +100,28 @@ export function FilterBar({
         </Button>
       </div>
 
-      <Button
-        onClick={onCreateClick}
-        className="h-9 flex items-center gap-1.5 shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
-      >
-        <Plus className="w-4 h-4" />
-        <span>Catat Baru</span>
-      </Button>
+      <div className="flex items-center gap-2">
+        {onExportClick && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onExportClick}
+            className="h-9 px-3 text-xs flex items-center gap-1.5 border-zinc-800 hover:bg-zinc-900 text-zinc-300"
+            title="Ekspor ke CSV"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Ekspor CSV</span>
+          </Button>
+        )}
+
+        <Button
+          onClick={onCreateClick}
+          className="h-9 flex items-center gap-1.5 shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Catat Baru</span>
+        </Button>
+      </div>
     </div>
   )
 }
