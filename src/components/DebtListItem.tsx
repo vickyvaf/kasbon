@@ -2,13 +2,37 @@ import { Debt } from '@/lib/types'
 import { formatRupiah, formatRelativeDate } from '@/lib/formatters'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { CheckCircle2, Undo2, Edit2, Trash2 } from 'lucide-react'
+import { CheckCircle2, Undo2, Edit2, Trash2, AlertCircle } from 'lucide-react'
 
 interface DebtListItemProps {
   debt: Debt
   onToggleSettled: (debt: Debt) => void
   onEdit: (debt: Debt) => void
   onDelete: (debt: Debt) => void
+}
+
+function getDueDateBadge(dueDate?: string | null, isSettled?: boolean) {
+  if (isSettled || !dueDate) return null
+
+  const today = new Date().toISOString().split('T')[0]
+  if (dueDate < today) {
+    return (
+      <Badge variant="outline" className="text-xs font-normal bg-rose-950/60 text-rose-400 border-rose-800/80 flex items-center gap-1">
+        <AlertCircle className="w-3 h-3" />
+        <span>Terlewat Jatuh Tempo</span>
+      </Badge>
+    )
+  }
+  if (dueDate === today) {
+    return (
+      <Badge variant="outline" className="text-xs font-normal bg-amber-950/60 text-amber-400 border-amber-800/80 flex items-center gap-1">
+        <AlertCircle className="w-3 h-3" />
+        <span>Jatuh Tempo Hari Ini</span>
+      </Badge>
+    )
+  }
+
+  return null
 }
 
 export function DebtListItem({
@@ -19,11 +43,12 @@ export function DebtListItem({
 }: DebtListItemProps) {
   const isSettled = !!debt.settled_at
   const isOwedToMe = debt.type === 'owed_to_me'
+  const dueDateBadge = getDueDateBadge(debt.due_date, isSettled)
 
   return (
     <div className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${isSettled ? 'bg-zinc-900/30 opacity-70' : ''}`}>
       <div className="space-y-1">
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="font-semibold text-base text-zinc-100">{debt.counterpart_name}</span>
           <Badge variant="outline" className="text-xs font-normal border-zinc-800 bg-zinc-900 text-zinc-300">
             {isOwedToMe ? 'Saya dihutang' : 'Saya hutang'}
@@ -38,6 +63,7 @@ export function DebtListItem({
           >
             {isSettled ? 'Lunas' : 'Belum Lunas'}
           </Badge>
+          {dueDateBadge}
         </div>
 
         <div className="flex items-center space-x-3 text-xs text-zinc-400">

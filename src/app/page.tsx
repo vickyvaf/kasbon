@@ -7,6 +7,7 @@ import { DebtModal } from '@/components/DebtModal'
 import { DeleteConfirmModal } from '@/components/DeleteConfirmModal'
 import { Navbar } from '@/components/Navbar'
 import { SummaryCards } from '@/components/SummaryCards'
+import { AnalyticsChart } from '@/components/AnalyticsChart'
 import { FilterBar } from '@/components/FilterBar'
 import { EmptyState } from '@/components/EmptyState'
 import { DebtListSkeleton } from '@/components/DebtListSkeleton'
@@ -14,6 +15,7 @@ import { DebtListItem } from '@/components/DebtListItem'
 import { DebtListGrouped } from '@/components/DebtListGrouped'
 import { useDisclosure } from '@/hooks/useDisclosure'
 import { useDebounce } from '@/hooks/useDebounce'
+import { exportDebtsToCsv } from '@/lib/exportToCsv'
 import {
   useDebtsQuery,
   useCreateDebtMutation,
@@ -105,6 +107,12 @@ export default function DashboardPage() {
           isLoading={isLoading}
         />
 
+        <AnalyticsChart
+          totalOwedToMe={totalOwedToMe}
+          totalIOwe={totalIOwe}
+          isLoading={isLoading}
+        />
+
         <FilterBar
           search={filters.search}
           onSearchChange={(val) => setFilters((prev) => ({ ...prev, search: val }))}
@@ -115,6 +123,7 @@ export default function DashboardPage() {
           groupByPerson={filters.groupByPerson}
           onToggleGroupByPerson={() => setFilters((prev) => ({ ...prev, groupByPerson: !prev.groupByPerson }))}
           onCreateClick={() => modalDisclosure.onOpen()}
+          onExportClick={() => exportDebtsToCsv(filteredDebts)}
         />
 
         {isError && (
