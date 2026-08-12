@@ -11,10 +11,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Logo } from '@/components/Logo'
+import { Eye, EyeOff } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
   const isSignUpMode = useDisclosure(false)
+  const showPassword = useDisclosure(false)
 
   const loginMutation = useLoginMutation()
   const signupMutation = useSignupMutation()
@@ -96,13 +98,28 @@ export default function LoginPage() {
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                className="bg-zinc-900 border-zinc-800 focus-visible:ring-[#FC580F]"
-                {...register('password')}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword.isOpen ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  className="bg-zinc-900 border-zinc-800 pr-10 focus-visible:ring-[#FC580F]"
+                  {...register('password')}
+                />
+                <button
+                  type="button"
+                  onClick={showPassword.onToggle}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
+                  tabIndex={-1}
+                  aria-label={showPassword.isOpen ? 'Sembunyikan password' : 'Tampilkan password'}
+                >
+                  {showPassword.isOpen ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
               {errors.password && (
                 <p className="text-xs text-red-400">{errors.password.message}</p>
               )}
