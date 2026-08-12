@@ -10,6 +10,7 @@ Web aplikasi sederhana untuk mencatat dan mengelola utang-piutang pribadi, diban
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://<your-project-ref>.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
+RESEND_API_KEY=<your-resend-api-key>
 ```
 
 ### 2. Migrasi Database (Supabase SQL Editor)
@@ -59,7 +60,7 @@ Penerapan arsitektur **TanStack React Query Optimistic Updates** yang dipadukan 
 ---
 
 ## 🛠️ Trade-off
-Kalau ada 1 hari lagi, saya akan menambahkan fitur ekspor laporan ke CSV/PDF dan integrasi email pengingat otomatis saat tanggal jatuh tempo utang mendekat.
+Kalau ada 1 hari lagi, saya akan menambahkan fitur ekspor laporan ke CSV/PDF dan integrasi pengiriman email pengingat otomatis berkala (via Resend & Cron Job) saat tanggal jatuh tempo utang mendekat.
 
 ---
 
