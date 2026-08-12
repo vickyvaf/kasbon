@@ -50,7 +50,7 @@ Buka [http://localhost:3000](http://localhost:3000).
 ---
 
 ## 🔗 Demo
-- **Vercel Deploy**: [https://task-kasbon.vercel.app](https://task-kasbon.vercel.app)
+- **Vercel Deploy**: [https://kasboncom.netlify.app](https://kasboncom.netlify.app)
 
 ---
 
@@ -60,9 +60,9 @@ Penerapan arsitektur **TanStack React Query Optimistic Updates** yang dipadukan 
 ---
 
 ## 🛠️ Trade-off
-Kalau ada 1 hari lagi, saya akan menambahkan fitur ekspor laporan ke CSV/PDF dan integrasi pengiriman email pengingat otomatis berkala (via Resend & Cron Job) saat tanggal jatuh tempo utang mendekat.
+Kalau ada 1 hari lagi, saya akan menambahkan pengingat melalui whatsapp pengingat otomatis berkala (via Resend & Cron Job) saat tanggal jatuh tempo utang mendekat.
 
 ---
 
 ## ⏱️ Time Spent
-~4 Jam (Setup Next.js 16 & Supabase Auth/RLS, API Endpoints, Optimistic Updates, komponen modular, Skeleton & Toast UI, dan dokumentasi).
+~3 Jam (Setup Next.js 16 & Supabase Auth/RLS, API Endpoints, Optimistic Updates, komponen modular, Skeleton & Toast UI, dan dokumentasi video).
