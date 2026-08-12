@@ -49,6 +49,7 @@ export function DebtModal({
   })
 
   const selectedType = watch('type')
+  const rawAmount = watch('amount')
   const noteValue = watch('note') || ''
 
   useEffect(() => {
@@ -132,11 +133,16 @@ export function DebtModal({
             <Label htmlFor="amount">Jumlah (Rp) *</Label>
             <Input
               id="amount"
-              type="number"
-              min="1"
-              placeholder="Contoh: 50000"
+              type="text"
+              inputMode="numeric"
+              placeholder="Contoh: 50.000"
+              value={rawAmount && !isNaN(rawAmount) ? rawAmount.toLocaleString('id-ID') : ''}
+              onChange={(e) => {
+                const digitsOnly = e.target.value.replace(/\D/g, '')
+                const parsed = digitsOnly ? parseInt(digitsOnly, 10) : undefined
+                setValue('amount', parsed as any, { shouldValidate: true })
+              }}
               className="bg-zinc-900 border-zinc-800 focus-visible:ring-[#FC580F]"
-              {...register('amount', { valueAsNumber: true })}
             />
             {errors.amount && (
               <p className="text-xs text-red-400">{errors.amount.message}</p>
