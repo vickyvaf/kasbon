@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Debt, DebtStatusFilter, DebtTypeFilter } from '@/lib/types'
 import { CreateDebtFormInput } from '@/schemas/debtSchema'
 import { DebtModal } from '@/components/DebtModal'
+import { DeleteConfirmModal } from '@/components/DeleteConfirmModal'
 import { Navbar } from '@/components/Navbar'
 import { SummaryCards } from '@/components/SummaryCards'
 import { FilterBar } from '@/components/FilterBar'
@@ -30,6 +31,7 @@ export default function DashboardPage() {
   })
 
   const modalDisclosure = useDisclosure<Debt>()
+  const deleteModalDisclosure = useDisclosure<Debt>()
 
   const { data: debts = [], isLoading, isError, error } = useDebtsQuery(filters.status, filters.type)
   const createMutation = useCreateDebtMutation()
@@ -53,9 +55,10 @@ export default function DashboardPage() {
     })
   }
 
-  function handleDeleteDebt(id: string) {
-    if (!confirm('Apakah Anda yakin ingin menghapus catatan ini?')) return
-    deleteMutation.mutate(id)
+  function handleConfirmDelete() {
+    if (deleteModalDisclosure.data) {
+      deleteMutation.mutate(deleteModalDisclosure.data.id)
+    }
   }
 
   const totalOwedToMe = debts
@@ -149,7 +152,7 @@ export default function DashboardPage() {
             groupedDebts={groupedDebts}
             onToggleSettled={handleToggleSettled}
             onEdit={(d) => modalDisclosure.onOpen(d)}
-            onDelete={handleDeleteDebt}
+            onDelete={(d) => deleteModalDisclosure.onOpen(d)}
           />
         ) : (
           <Card className="bg-zinc-950 border-zinc-800">
@@ -160,7 +163,7 @@ export default function DashboardPage() {
                   debt={debt}
                   onToggleSettled={handleToggleSettled}
                   onEdit={(d) => modalDisclosure.onOpen(d)}
-                  onDelete={handleDeleteDebt}
+                  onDelete={(d) => deleteModalDisclosure.onOpen(d)}
                 />
               ))}
             </CardContent>
@@ -173,6 +176,13 @@ export default function DashboardPage() {
         onClose={modalDisclosure.onClose}
         onSave={handleSaveDebt}
         initialData={modalDisclosure.data}
+      />
+
+      <DeleteConfirmModal
+        isOpen={deleteModalDisclosure.isOpen}
+        onClose={deleteModalDisclosure.onClose}
+        onConfirm={handleConfirmDelete}
+        counterpartName={deleteModalDisclosure.data?.counterpart_name}
       />
     </div>
   )

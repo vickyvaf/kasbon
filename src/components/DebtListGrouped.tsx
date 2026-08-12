@@ -14,7 +14,7 @@ interface DebtListGroupedProps {
   groupedDebts: Record<string, GroupData>
   onToggleSettled: (debt: Debt) => void
   onEdit: (debt: Debt) => void
-  onDelete: (id: string) => void
+  onDelete: (debt: Debt) => void
 }
 
 export function DebtListGrouped({

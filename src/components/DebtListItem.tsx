@@ -8,7 +8,7 @@ interface DebtListItemProps {
   debt: Debt
   onToggleSettled: (debt: Debt) => void
   onEdit: (debt: Debt) => void
-  onDelete: (id: string) => void
+  onDelete: (debt: Debt) => void
 }
 
 export function DebtListItem({
@@ -86,7 +86,7 @@ export function DebtListItem({
             size="icon"
             variant="ghost"
             className="h-8 w-8 text-rose-400 hover:text-rose-300 hover:bg-zinc-900"
-            onClick={() => onDelete(debt.id)}
+            onClick={() => onDelete(debt)}
             title="Hapus"
           >
             <Trash2 className="w-4 h-4" />
