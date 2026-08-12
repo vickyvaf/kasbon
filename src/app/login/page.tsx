@@ -1,10 +1,11 @@
 'use client'
 
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { authSchema, AuthFormInput } from '@/schemas/authSchema'
-import { useLoginMutation, useSignupMutation } from '@/hooks/useAuth'
+import { useLoginMutation } from '@/hooks/useAuth'
 import { useDisclosure } from '@/hooks/useDisclosure'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,16 +16,12 @@ import { Eye, EyeOff } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
-  const isSignUpMode = useDisclosure(false)
   const showPassword = useDisclosure(false)
-
   const loginMutation = useLoginMutation()
-  const signupMutation = useSignupMutation()
 
   const {
     register,
     handleSubmit,
-    reset: resetForm,
     formState: { errors },
   } = useForm<AuthFormInput>({
     resolver: zodResolver(authSchema),
@@ -34,24 +31,10 @@ export default function LoginPage() {
     },
   })
 
-  const isLoading = loginMutation.isPending || signupMutation.isPending
-  const activeError = isSignUpMode.isOpen ? signupMutation.error : loginMutation.error
-
-  function toggleMode() {
-    isSignUpMode.onToggle()
-    loginMutation.reset()
-    signupMutation.reset()
-    resetForm()
-  }
-
   async function onSubmit(data: AuthFormInput) {
-    if (isSignUpMode.isOpen) {
-      await signupMutation.mutateAsync(data)
-    } else {
-      await loginMutation.mutateAsync(data)
-      router.push('/')
-      router.refresh()
-    }
+    await loginMutation.mutateAsync(data)
+    router.push('/')
+    router.refresh()
   }
 
   return (
@@ -61,24 +44,16 @@ export default function LoginPage() {
           <div className="flex justify-center mb-2">
             <Logo size={48} />
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight">Kasbon</CardTitle>
+          <CardTitle className="text-2xl font-bold tracking-tight">Masuk ke Kasbon</CardTitle>
           <CardDescription>
-            {isSignUpMode.isOpen
-              ? 'Buat akun baru untuk mulai mencatat utang-piutang'
-              : 'Masuk ke akun Anda untuk mengelola catatan utang'}
+            Masuk ke akun Anda untuk mengelola catatan utang
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {activeError && (
+            {loginMutation.error && (
               <div className="p-3 text-sm rounded border border-red-900/50 bg-red-950/40 text-red-400">
-                {activeError.message}
-              </div>
-            )}
-
-            {isSignUpMode.isOpen && signupMutation.isSuccess && (
-              <div className="p-3 text-sm rounded border border-emerald-900/50 bg-emerald-950/40 text-emerald-400">
-                Pendaftaran berhasil! Silakan masuk dengan akun Anda.
+                {loginMutation.error.message}
               </div>
             )}
 
@@ -128,26 +103,21 @@ export default function LoginPage() {
             <Button
               type="submit"
               className="w-full bg-[#FC580F] hover:bg-[#e04c0b] text-white font-medium"
-              disabled={isLoading}
+              disabled={loginMutation.isPending}
             >
-              {isLoading
-                ? 'Memproses...'
-                : isSignUpMode.isOpen
-                ? 'Daftar Akun'
-                : 'Masuk'}
+              {loginMutation.isPending ? 'Memproses...' : 'Masuk'}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="justify-center border-t border-zinc-800 p-4 text-center">
           <p className="text-sm text-muted-foreground">
-            {isSignUpMode.isOpen ? 'Sudah punya akun?' : 'Belum punya akun?'}{' '}
-            <button
-              type="button"
-              onClick={toggleMode}
+            Belum punya akun?{' '}
+            <Link
+              href="/signup"
               className="font-medium text-[#FC580F] hover:underline underline-offset-4"
             >
-              {isSignUpMode.isOpen ? 'Masuk sekarang' : 'Daftar sekarang'}
-            </button>
+              Daftar sekarang
+            </Link>
           </p>
         </CardFooter>
       </Card>
