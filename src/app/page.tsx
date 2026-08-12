@@ -9,6 +9,7 @@ import { Navbar } from '@/components/Navbar'
 import { SummaryCards } from '@/components/SummaryCards'
 import { FilterBar } from '@/components/FilterBar'
 import { EmptyState } from '@/components/EmptyState'
+import { DebtListSkeleton } from '@/components/DebtListSkeleton'
 import { DebtListItem } from '@/components/DebtListItem'
 import { DebtListGrouped } from '@/components/DebtListGrouped'
 import { useDisclosure } from '@/hooks/useDisclosure'
@@ -123,9 +124,7 @@ export default function DashboardPage() {
         )}
 
         {isLoading ? (
-          <div className="text-center py-12 text-zinc-500 text-sm">
-            Memuat data catatan utang...
-          </div>
+          <DebtListSkeleton />
         ) : filteredDebts.length === 0 ? (
           <EmptyState
             isFiltered={!!(filters.search || filters.status !== 'all' || filters.type !== 'all')}
