@@ -9,6 +9,7 @@ import { formatRupiah, formatRelativeDate } from '@/lib/formatters'
 import { DebtModal } from '@/components/DebtModal'
 import { Logo } from '@/components/Logo'
 import { useDisclosure } from '@/hooks/useDisclosure'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   useDebtsQuery,
   useCreateDebtMutation,
@@ -80,8 +81,11 @@ export default function DashboardPage() {
     checkAuth()
   }, [supabase, router])
 
+  const queryClient = useQueryClient()
+
   // Handle Logout
   async function handleLogout() {
+    queryClient.clear()
     await supabase.auth.signOut()
     router.push('/login')
     router.refresh()
