@@ -102,6 +102,7 @@ export default function DashboardPage() {
           totalOwedToMe={totalOwedToMe}
           totalIOwe={totalIOwe}
           netBalance={netBalance}
+          isLoading={isLoading}
         />
 
         <FilterBar
