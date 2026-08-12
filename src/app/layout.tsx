@@ -1,12 +1,6 @@
 import type { Metadata } from 'next'
-import { Manrope } from 'next/font/google'
 import { QueryProvider } from '@/providers/QueryProvider'
 import './globals.css'
-
-const manrope = Manrope({
-  subsets: ['latin'],
-  variable: '--font-manrope',
-})
 
 export const metadata: Metadata = {
   title: 'Kasbon — Catatan Utang Piutang',
@@ -19,11 +13,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html
-      lang="id"
-      className={`${manrope.variable} h-full antialiased`}
-    >
-      <body className={`${manrope.className} min-h-full flex flex-col`}>
+    <html lang="id" className="h-full antialiased">
+      <body className="min-h-full flex flex-col font-sans">
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
