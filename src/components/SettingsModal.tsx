@@ -44,7 +44,7 @@ export function SettingsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md bg-zinc-950 border-zinc-800 text-foreground">
+      <DialogContent className="sm:max-w-md max-h-screen overflow-auto my-5 md:my-0 bg-zinc-950 border-zinc-800 text-foreground">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
             <Settings className="w-5 h-5 text-primary" />
@@ -73,11 +73,10 @@ export function SettingsModal({
               {FREQUENCY_OPTIONS.map((opt) => (
                 <label
                   key={opt.value}
-                  className={`flex items-start space-x-3 p-2 rounded-md border cursor-pointer transition-colors ${
-                    frequency === opt.value
-                      ? 'border-primary/50 bg-primary/10'
-                      : 'border-zinc-800/80 hover:bg-zinc-800/40'
-                  }`}
+                  className={`flex items-start space-x-3 p-2 rounded-md border cursor-pointer transition-colors ${frequency === opt.value
+                    ? 'border-primary/50 bg-primary/10'
+                    : 'border-zinc-800/80 hover:bg-zinc-800/40'
+                    }`}
                 >
                   <RadioGroupItem value={opt.value} id={`freq-${opt.value}`} className="mt-0.5" />
                   <div className="space-y-0.5">

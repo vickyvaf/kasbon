@@ -37,9 +37,9 @@ export function AnalyticsChart({
 
   return (
     <Card className="bg-zinc-950 border-zinc-800">
-      <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
+      <CardHeader className="pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 space-y-0">
         <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
-          <PieChart className="w-4 h-4 text-primary" />
+          <PieChart className="w-4 h-4 text-primary shrink-0" />
           <span>Analisis Rasio Utang vs Piutang</span>
         </CardTitle>
         <span className="text-xs text-zinc-500 font-mono">
@@ -62,18 +62,22 @@ export function AnalyticsChart({
         </div>
 
         {/* Breakdown Metrics */}
-        <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center space-x-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
-            <span className="text-zinc-400">Piutang (Saya dihutang):</span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+          <div className="flex items-center justify-between sm:justify-start gap-2">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block shrink-0" />
+              <span className="text-zinc-400">Piutang:</span>
+            </div>
             <span className="font-semibold text-emerald-400">
               {formatRupiah(totalOwedToMe)} ({owedToMePercent}%)
             </span>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block" />
-            <span className="text-zinc-400">Utang (Saya hutang):</span>
+          <div className="flex items-center justify-between sm:justify-start gap-2">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block shrink-0" />
+              <span className="text-zinc-400">Utang:</span>
+            </div>
             <span className="font-semibold text-rose-400">
               {formatRupiah(totalIOwe)} ({iOwePercent}%)
             </span>
