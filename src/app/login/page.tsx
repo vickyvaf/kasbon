@@ -2,7 +2,10 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { authSchema, AuthFormInput } from '@/schemas/authSchema'
+import { useLoginMutation, useSignupMutation } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -11,53 +14,62 @@ import { Wallet } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
-  const supabase = createClient()
 
-  const [isSignUp, setIsSignUp] = useState(false)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [errorMsg, setErrorMsg] = useState('')
-  const [successMsg, setSuccessMsg] = useState('')
+  const [uiState, setUiState] = useState({
+    isSignUp: false,
+    message: '',
+    messageType: 'error' as 'error' | 'success',
+  })
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setErrorMsg('')
-    setSuccessMsg('')
+  const loginMutation = useLoginMutation()
+  const signupMutation = useSignupMutation()
 
-    if (!email || !password) {
-      setErrorMsg('Email dan password wajib diisi.')
-      setLoading(false)
-      return
-    }
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<AuthFormInput>({
+    resolver: zodResolver(authSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  })
 
-    if (isSignUp) {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-      })
+  const isLoading = loginMutation.isPending || signupMutation.isPending
 
-      if (error) {
-        setErrorMsg(error.message || 'Gagal mendaftar. Silakan coba lagi.')
-      } else {
-        setSuccessMsg('Pendaftaran berhasil! Silakan cek email Anda untuk konfirmasi atau langsung masuk.')
-        setIsSignUp(false)
+  async function onSubmit(data: AuthFormInput) {
+    setUiState((prev) => ({ ...prev, message: '' }))
+
+    if (uiState.isSignUp) {
+      try {
+        await signupMutation.mutateAsync(data)
+        setUiState((prev) => ({
+          ...prev,
+          message: 'Pendaftaran berhasil! Silakan cek email Anda untuk konfirmasi atau langsung masuk.',
+          messageType: 'success',
+          isSignUp: false,
+        }))
+      } catch (err: unknown) {
+        setUiState((prev) => ({
+          ...prev,
+          message: err instanceof Error ? err.message : 'Gagal mendaftar.',
+          messageType: 'error',
+        }))
       }
     } else {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (error) {
-        setErrorMsg('Email atau password salah.')
-      } else {
+      try {
+        await loginMutation.mutateAsync(data)
         router.push('/')
         router.refresh()
+      } catch (err: unknown) {
+        setUiState((prev) => ({
+          ...prev,
+          message: err instanceof Error ? err.message : 'Email atau password salah.',
+          messageType: 'error',
+        }))
       }
     }
-    setLoading(false)
   }
 
   return (
@@ -71,49 +83,55 @@ export default function LoginPage() {
           </div>
           <CardTitle className="text-2xl font-bold tracking-tight">Kasbon</CardTitle>
           <CardDescription>
-            {isSignUp
+            {uiState.isSignUp
               ? 'Buat akun baru untuk mulai mencatat utang-piutang'
               : 'Masuk ke akun Anda untuk mengelola catatan utang'}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {errorMsg && (
-              <div className="p-3 text-sm rounded border border-red-200 bg-red-50 text-red-700 dark:bg-red-950 dark:border-red-900 dark:text-red-300">
-                {errorMsg}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {uiState.message && (
+              <div
+                className={`p-3 text-sm rounded border ${
+                  uiState.messageType === 'error'
+                    ? 'border-red-200 bg-red-50 text-red-700 dark:bg-red-950 dark:border-red-900 dark:text-red-300'
+                    : 'border-green-200 bg-green-50 text-green-700 dark:bg-green-950 dark:border-green-900 dark:text-green-300'
+                }`}
+              >
+                {uiState.message}
               </div>
             )}
-            {successMsg && (
-              <div className="p-3 text-sm rounded border border-green-200 bg-green-50 text-green-700 dark:bg-green-950 dark:border-green-900 dark:text-green-300">
-                {successMsg}
-              </div>
-            )}
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="nama@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+                {...register('email')}
               />
+              {errors.email && (
+                <p className="text-xs text-red-500">{errors.email.message}</p>
+              )}
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
                 placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+                {...register('password')}
               />
+              {errors.password && (
+                <p className="text-xs text-red-500">{errors.password.message}</p>
+              )}
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading
+
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading
                 ? 'Memproses...'
-                : isSignUp
+                : uiState.isSignUp
                 ? 'Daftar Akun'
                 : 'Masuk'}
             </Button>
@@ -121,17 +139,19 @@ export default function LoginPage() {
         </CardContent>
         <CardFooter className="justify-center border-t p-4 text-center">
           <p className="text-sm text-muted-foreground">
-            {isSignUp ? 'Sudah punya akun?' : 'Belum punya akun?'}{' '}
+            {uiState.isSignUp ? 'Sudah punya akun?' : 'Belum punya akun?'}{' '}
             <button
               type="button"
-              onClick={() => {
-                setIsSignUp(!isSignUp)
-                setErrorMsg('')
-                setSuccessMsg('')
-              }}
+              onClick={() =>
+                setUiState((prev) => ({
+                  ...prev,
+                  isSignUp: !prev.isSignUp,
+                  message: '',
+                }))
+              }
               className="font-medium underline underline-offset-4 hover:text-primary"
             >
-              {isSignUp ? 'Masuk sekarang' : 'Daftar sekarang'}
+              {uiState.isSignUp ? 'Masuk sekarang' : 'Daftar sekarang'}
             </button>
           </p>
         </CardFooter>

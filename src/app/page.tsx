@@ -7,6 +7,7 @@ import { Debt, DebtStatusFilter, DebtTypeFilter } from '@/lib/types'
 import { CreateDebtFormInput } from '@/schemas/debtSchema'
 import { formatRupiah, formatRelativeDate } from '@/lib/formatters'
 import { DebtModal } from '@/components/DebtModal'
+import { useDisclosure } from '@/hooks/useDisclosure'
 import {
   useDebtsQuery,
   useCreateDebtMutation,
@@ -44,20 +45,23 @@ export default function DashboardPage() {
   const router = useRouter()
   const supabase = createClient()
 
+  // User state
   const [userEmail, setUserEmail] = useState<string>('')
 
-  // Filters & Search
-  const [statusFilter, setStatusFilter] = useState<DebtStatusFilter>('all')
-  const [typeFilter, setTypeFilter] = useState<DebtTypeFilter>('all')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [groupByPerson, setGroupByPerson] = useState(false)
+  // Consolidated Filters & Search Object State
+  const [filters, setFilters] = useState({
+    status: 'all' as DebtStatusFilter,
+    type: 'all' as DebtTypeFilter,
+    search: '',
+    groupByPerson: false,
+  })
 
-  // Modal State
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  // Modal State using custom useDisclosure hook
+  const modalDisclosure = useDisclosure(false)
   const [editingDebt, setEditingDebt] = useState<Debt | null>(null)
 
   // React Query Custom Hooks
-  const { data: debts = [], isLoading, isError, error } = useDebtsQuery(statusFilter, typeFilter)
+  const { data: debts = [], isLoading, isError, error } = useDebtsQuery(filters.status, filters.type)
   const createMutation = useCreateDebtMutation()
   const updateMutation = useUpdateDebtMutation()
   const deleteMutation = useDeleteDebtMutation()
@@ -89,7 +93,7 @@ export default function DashboardPage() {
     } else {
       await createMutation.mutateAsync(formData)
     }
-    setIsModalOpen(false)
+    modalDisclosure.onClose()
     setEditingDebt(null)
   }
 
@@ -122,8 +126,8 @@ export default function DashboardPage() {
   // Search Filtering
   const filteredDebts = debts.filter(
     (debt) =>
-      debt.counterpart_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (debt.note && debt.note.toLowerCase().includes(searchQuery.toLowerCase()))
+      debt.counterpart_name.toLowerCase().includes(filters.search.toLowerCase()) ||
+      (debt.note && debt.note.toLowerCase().includes(filters.search.toLowerCase()))
   )
 
   // Grouped Debts Logic
@@ -227,15 +231,19 @@ export default function DashboardPage() {
               <Search className="w-4 h-4 absolute left-2.5 top-3 text-muted-foreground" />
               <Input
                 placeholder="Cari nama / catatan..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={filters.search}
+                onChange={(e) =>
+                  setFilters((prev) => ({ ...prev, search: e.target.value }))
+                }
                 className="pl-8 h-9 text-sm"
               />
             </div>
 
             <Select
-              value={statusFilter}
-              onValueChange={(val) => setStatusFilter(val as DebtStatusFilter)}
+              value={filters.status}
+              onValueChange={(val) =>
+                setFilters((prev) => ({ ...prev, status: val as DebtStatusFilter }))
+              }
             >
               <SelectTrigger className="w-[130px] h-9 text-sm">
                 <SelectValue placeholder="Status" />
@@ -248,8 +256,10 @@ export default function DashboardPage() {
             </Select>
 
             <Select
-              value={typeFilter}
-              onValueChange={(val) => setTypeFilter(val as DebtTypeFilter)}
+              value={filters.type}
+              onValueChange={(val) =>
+                setFilters((prev) => ({ ...prev, type: val as DebtTypeFilter }))
+              }
             >
               <SelectTrigger className="w-[145px] h-9 text-sm">
                 <SelectValue placeholder="Tipe" />
@@ -264,19 +274,21 @@ export default function DashboardPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setGroupByPerson(!groupByPerson)}
+              onClick={() =>
+                setFilters((prev) => ({ ...prev, groupByPerson: !prev.groupByPerson }))
+              }
               className="h-9 px-2.5 text-xs flex items-center gap-1"
               title="Kelompokkan per orang"
             >
               <Users className="w-3.5 h-3.5" />
-              <span>{groupByPerson ? 'Biasa' : 'Kelompokkan'}</span>
+              <span>{filters.groupByPerson ? 'Biasa' : 'Kelompokkan'}</span>
             </Button>
           </div>
 
           <Button
             onClick={() => {
               setEditingDebt(null)
-              setIsModalOpen(true)
+              modalDisclosure.onOpen()
             }}
             className="h-9 flex items-center gap-1.5 shrink-0"
           >
@@ -285,7 +297,7 @@ export default function DashboardPage() {
           </Button>
         </div>
 
-        {/* Error Notification via React Query isError */}
+        {/* Error Notification */}
         {isError && (
           <div className="p-4 text-sm rounded border border-red-200 bg-red-50 text-red-700 dark:bg-red-950 dark:border-red-900 dark:text-red-300 flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
@@ -293,7 +305,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* List Content using React Query isLoading state */}
+        {/* List Content */}
         {isLoading ? (
           <div className="text-center py-12 text-muted-foreground text-sm">
             Memuat data catatan utang...
@@ -306,7 +318,7 @@ export default function DashboardPage() {
               </div>
               <div className="font-semibold text-base">Belum Ada Catatan Utang</div>
               <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                {searchQuery || statusFilter !== 'all' || typeFilter !== 'all'
+                {filters.search || filters.status !== 'all' || filters.type !== 'all'
                   ? 'Tidak ada catatan yang sesuai dengan filter yang dipilih.'
                   : 'Mulai dengan mencatat utang atau piutang baru.'}
               </p>
@@ -315,14 +327,14 @@ export default function DashboardPage() {
                 size="sm"
                 onClick={() => {
                   setEditingDebt(null)
-                  setIsModalOpen(true)
+                  modalDisclosure.onOpen()
                 }}
               >
                 + Catat Sekarang
               </Button>
             </CardContent>
           </Card>
-        ) : groupByPerson ? (
+        ) : filters.groupByPerson ? (
           /* Grouped View */
           <div className="space-y-4">
             {Object.values(groupedDebts).map((group, idx) => (
@@ -355,7 +367,7 @@ export default function DashboardPage() {
                       onToggleSettled={handleToggleSettled}
                       onEdit={(d) => {
                         setEditingDebt(d)
-                        setIsModalOpen(true)
+                        modalDisclosure.onOpen()
                       }}
                       onDelete={handleDeleteDebt}
                     />
@@ -375,7 +387,7 @@ export default function DashboardPage() {
                   onToggleSettled={handleToggleSettled}
                   onEdit={(d) => {
                     setEditingDebt(d)
-                    setIsModalOpen(true)
+                    modalDisclosure.onOpen()
                   }}
                   onDelete={handleDeleteDebt}
                 />
@@ -387,9 +399,9 @@ export default function DashboardPage() {
 
       {/* Modal Form */}
       <DebtModal
-        isOpen={isModalOpen}
+        isOpen={modalDisclosure.isOpen}
         onClose={() => {
-          setIsModalOpen(false)
+          modalDisclosure.onClose()
           setEditingDebt(null)
         }}
         onSave={handleSaveDebt}
