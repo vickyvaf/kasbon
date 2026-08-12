@@ -87,13 +87,13 @@ CREATE POLICY "Users can delete their own debts" ON public.debts FOR DELETE USIN
 ### 4. Menjalankan Aplikasi
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Jalankan server verifikasi / dev
-npm run dev
+pnpm dev
 
 # Jalankan build produksi
-npm run build
+pnpm build
 ```
 
 Buka [http://localhost:3000](http://localhost:3000) di browser.
