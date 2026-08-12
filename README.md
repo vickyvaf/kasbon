@@ -151,7 +151,7 @@ Seluruh fitur utama PRD beserta fitur polesan berikut telah berhasil diimplement
 - **Analisis Rasio Utang vs Piutang**: Komponen grafis visual `AnalyticsChart` yang menampilkan persentase rasio Piutang vs Utang secara real-time.
 - **Ekspor Laporan CSV**: Fitur instant `exportDebtsToCsv` untuk mengunduh catatan utang yang terfilter dalam format berkas `.csv`.
 - **Indikator Visual Jatuh Tempo**: Badge peringatan otomatis `Terlewat Jatuh Tempo` (merah) dan `Jatuh Tempo Hari Ini` (kuning) pada setiap baris catatan.
-- **Rencana Pengembangan Berikutnya**: Integrasi pengingat otomatis via email/WhatsApp saat tanggal jatuh tempo mendekat serta grafik tren histori transaksi bulanan.
+- **Rencana Pengembangan Berikutnya**: Integrasi pengingat otomatis ke email pengguna (serta template pesan WhatsApp penagihan ke pihak bersangkutan) saat tanggal jatuh tempo mendekat.
 
 ### Time Spent
 **Durasi Pengerjaan**: ~4 Jam (Inisialisasi project, setup Supabase Auth & RLS, pembuatan API endpoints, arsitektur React Query optimistic updates, refactoring komponen modular, integrasi Skeleton & Toast UI, pengujian fitur, dan dokumentasi).
