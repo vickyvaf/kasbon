@@ -54,7 +54,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
 ```
 
 ### 3. Migrasi Database Supabase
-Jalankan skrip SQL yang ada pada file `supabase/migrations/01_init_debts.sql` di **Supabase SQL Editor**:
+Jalankan skrip SQL yang ada pada file `supabase/migrations/20260812104500_create_debts_table.sql` di **Supabase SQL Editor**:
 
 ```sql
 -- Membuat enum debt_type
