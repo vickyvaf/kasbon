@@ -84,9 +84,9 @@ export function DebtModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] bg-zinc-950 border-zinc-800 text-foreground">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-xl font-bold">
             {initialData ? 'Edit Catatan Utang' : 'Catat Utang Baru'}
           </DialogTitle>
         </DialogHeader>
@@ -102,20 +102,20 @@ export function DebtModal({
               className="flex space-x-4 pt-1"
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="owed_to_me" id="r-owed" />
-                <Label htmlFor="r-owed" className="cursor-pointer">
+                <RadioGroupItem value="owed_to_me" id="r-owed" className="border-zinc-700 text-[#FC580F]" />
+                <Label htmlFor="r-owed" className="cursor-pointer text-sm">
                   Saya dihutang (Piutang)
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="i_owe" id="r-owe" />
-                <Label htmlFor="r-owe" className="cursor-pointer">
+                <RadioGroupItem value="i_owe" id="r-owe" className="border-zinc-700 text-[#FC580F]" />
+                <Label htmlFor="r-owe" className="cursor-pointer text-sm">
                   Saya hutang (Utang)
                 </Label>
               </div>
             </RadioGroup>
             {errors.type && (
-              <p className="text-xs text-red-500">{errors.type.message}</p>
+              <p className="text-xs text-red-400">{errors.type.message}</p>
             )}
           </div>
 
@@ -124,10 +124,11 @@ export function DebtModal({
             <Input
               id="counterpart"
               placeholder="Contoh: Budi"
+              className="bg-zinc-900 border-zinc-800 focus-visible:ring-[#FC580F]"
               {...register('counterpart_name')}
             />
             {errors.counterpart_name && (
-              <p className="text-xs text-red-500">
+              <p className="text-xs text-red-400">
                 {errors.counterpart_name.message}
               </p>
             )}
@@ -140,10 +141,11 @@ export function DebtModal({
               type="number"
               min="1"
               placeholder="Contoh: 50000"
+              className="bg-zinc-900 border-zinc-800 focus-visible:ring-[#FC580F]"
               {...register('amount', { valueAsNumber: true })}
             />
             {errors.amount && (
-              <p className="text-xs text-red-500">{errors.amount.message}</p>
+              <p className="text-xs text-red-400">{errors.amount.message}</p>
             )}
           </div>
 
@@ -152,17 +154,18 @@ export function DebtModal({
             <Input
               id="dueDate"
               type="date"
+              className="bg-zinc-900 border-zinc-800 focus-visible:ring-[#FC580F]"
               {...register('due_date')}
             />
             {errors.due_date && (
-              <p className="text-xs text-red-500">{errors.due_date.message}</p>
+              <p className="text-xs text-red-400">{errors.due_date.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
             <div className="flex justify-between">
               <Label htmlFor="note">Catatan (Opsional)</Label>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-zinc-500">
                 {noteValue.length}/200
               </span>
             </div>
@@ -170,10 +173,11 @@ export function DebtModal({
               id="note"
               placeholder="Catatan singkat..."
               maxLength={200}
+              className="bg-zinc-900 border-zinc-800 focus-visible:ring-[#FC580F]"
               {...register('note')}
             />
             {errors.note && (
-              <p className="text-xs text-red-500">{errors.note.message}</p>
+              <p className="text-xs text-red-400">{errors.note.message}</p>
             )}
           </div>
 
@@ -183,10 +187,11 @@ export function DebtModal({
               variant="outline"
               onClick={onClose}
               disabled={isLoading}
+              className="border-zinc-800 hover:bg-zinc-900"
             >
               Batal
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading} className="bg-[#FC580F] hover:bg-[#e04c0b] text-white">
               {isLoading ? 'Menyimpan...' : 'Simpan'}
             </Button>
           </DialogFooter>

@@ -73,12 +73,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 dark:bg-slate-950">
-      <Card className="w-full max-w-md shadow-sm">
+    <div className="min-h-screen flex items-center justify-center bg-black p-4 text-foreground">
+      <Card className="w-full max-w-md shadow-sm border-zinc-800 bg-zinc-950">
         <CardHeader className="text-center space-y-1">
           <div className="flex justify-center mb-2">
-            <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-full">
-              <Wallet className="w-6 h-6 text-slate-900 dark:text-slate-100" />
+            <div className="p-3 bg-[#FC580F]/10 rounded-full">
+              <Wallet className="w-6 h-6 text-[#FC580F]" />
             </div>
           </div>
           <CardTitle className="text-2xl font-bold tracking-tight">Kasbon</CardTitle>
@@ -94,8 +94,8 @@ export default function LoginPage() {
               <div
                 className={`p-3 text-sm rounded border ${
                   uiState.messageType === 'error'
-                    ? 'border-red-200 bg-red-50 text-red-700 dark:bg-red-950 dark:border-red-900 dark:text-red-300'
-                    : 'border-green-200 bg-green-50 text-green-700 dark:bg-green-950 dark:border-green-900 dark:text-green-300'
+                    ? 'border-red-900/50 bg-red-950/40 text-red-400'
+                    : 'border-emerald-900/50 bg-emerald-950/40 text-emerald-400'
                 }`}
               >
                 {uiState.message}
@@ -108,10 +108,11 @@ export default function LoginPage() {
                 id="email"
                 type="email"
                 placeholder="nama@email.com"
+                className="bg-zinc-900 border-zinc-800 focus-visible:ring-[#FC580F]"
                 {...register('email')}
               />
               {errors.email && (
-                <p className="text-xs text-red-500">{errors.email.message}</p>
+                <p className="text-xs text-red-400">{errors.email.message}</p>
               )}
             </div>
 
@@ -121,14 +122,19 @@ export default function LoginPage() {
                 id="password"
                 type="password"
                 placeholder="••••••••"
+                className="bg-zinc-900 border-zinc-800 focus-visible:ring-[#FC580F]"
                 {...register('password')}
               />
               {errors.password && (
-                <p className="text-xs text-red-500">{errors.password.message}</p>
+                <p className="text-xs text-red-400">{errors.password.message}</p>
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full bg-[#FC580F] hover:bg-[#e04c0b] text-white font-medium"
+              disabled={isLoading}
+            >
               {isLoading
                 ? 'Memproses...'
                 : uiState.isSignUp
@@ -137,7 +143,7 @@ export default function LoginPage() {
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="justify-center border-t p-4 text-center">
+        <CardFooter className="justify-center border-t border-zinc-800 p-4 text-center">
           <p className="text-sm text-muted-foreground">
             {uiState.isSignUp ? 'Sudah punya akun?' : 'Belum punya akun?'}{' '}
             <button
@@ -149,7 +155,7 @@ export default function LoginPage() {
                   message: '',
                 }))
               }
-              className="font-medium underline underline-offset-4 hover:text-primary"
+              className="font-medium text-[#FC580F] hover:underline underline-offset-4"
             >
               {uiState.isSignUp ? 'Masuk sekarang' : 'Daftar sekarang'}
             </button>
