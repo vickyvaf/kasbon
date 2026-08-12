@@ -8,6 +8,7 @@ import { DeleteConfirmModal } from '@/components/DeleteConfirmModal'
 import { Navbar } from '@/components/Navbar'
 import { SummaryCards } from '@/components/SummaryCards'
 import { FilterBar } from '@/components/FilterBar'
+import { EmptyState } from '@/components/EmptyState'
 import { DebtListItem } from '@/components/DebtListItem'
 import { DebtListGrouped } from '@/components/DebtListGrouped'
 import { useDisclosure } from '@/hooks/useDisclosure'
@@ -126,27 +127,10 @@ export default function DashboardPage() {
             Memuat data catatan utang...
           </div>
         ) : filteredDebts.length === 0 ? (
-          <Card className="text-center py-12 bg-zinc-950 border-zinc-800">
-            <CardContent className="space-y-3">
-              <div className="mx-auto w-12 h-12 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-500">
-                <ListFilter className="w-6 h-6" />
-              </div>
-              <div className="font-semibold text-base">Belum Ada Catatan Utang</div>
-              <p className="text-sm text-zinc-400 max-w-sm mx-auto">
-                {filters.search || filters.status !== 'all' || filters.type !== 'all'
-                  ? 'Tidak ada catatan yang sesuai dengan filter yang dipilih.'
-                  : 'Mulai dengan mencatat utang atau piutang baru.'}
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-zinc-800 hover:bg-zinc-900"
-                onClick={() => modalDisclosure.onOpen()}
-              >
-                <Plus className="w-4 h-4 mr-1.5 inline" /> Catat Sekarang
-              </Button>
-            </CardContent>
-          </Card>
+          <EmptyState
+            isFiltered={!!(filters.search || filters.status !== 'all' || filters.type !== 'all')}
+            onCreateClick={() => modalDisclosure.onOpen()}
+          />
         ) : filters.groupByPerson ? (
           <DebtListGrouped
             groupedDebts={groupedDebts}
