@@ -20,9 +20,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 interface DebtModalProps {
   isOpen: boolean
   onClose: () => void
-  onSave: (data: CreateDebtFormInput, id?: string) => Promise<void>
+  onSave: (data: CreateDebtFormInput, id?: string) => void
   initialData?: Debt | null
-  isLoading?: boolean
 }
 
 export function DebtModal({
@@ -30,7 +29,6 @@ export function DebtModal({
   onClose,
   onSave,
   initialData,
-  isLoading = false,
 }: DebtModalProps) {
   const {
     register,
@@ -73,13 +71,9 @@ export function DebtModal({
     }
   }, [initialData, isOpen, reset])
 
-  async function onSubmit(data: CreateDebtFormInput) {
-    try {
-      await onSave(data, initialData?.id)
-      onClose()
-    } catch {
-      // Error handled by parent / hook
-    }
+  function onSubmit(data: CreateDebtFormInput) {
+    onSave(data, initialData?.id)
+    onClose()
   }
 
   return (
@@ -186,13 +180,12 @@ export function DebtModal({
               type="button"
               variant="outline"
               onClick={onClose}
-              disabled={isLoading}
               className="border-zinc-800 hover:bg-zinc-900"
             >
               Batal
             </Button>
-            <Button type="submit" disabled={isLoading} className="bg-[#FC580F] hover:bg-[#e04c0b] text-white">
-              {isLoading ? 'Menyimpan...' : 'Simpan'}
+            <Button type="submit" className="bg-[#FC580F] hover:bg-[#e04c0b] text-white">
+              Simpan
             </Button>
           </DialogFooter>
         </form>

@@ -88,29 +88,29 @@ export default function DashboardPage() {
   }
 
   // Handle Save (Create / Update)
-  async function handleSaveDebt(formData: CreateDebtFormInput, id?: string) {
+  function handleSaveDebt(formData: CreateDebtFormInput, id?: string) {
     if (id) {
-      await updateMutation.mutateAsync({ id, data: formData })
+      updateMutation.mutate({ id, data: formData })
     } else {
-      await createMutation.mutateAsync(formData)
+      createMutation.mutate(formData)
     }
     modalDisclosure.onClose()
     setEditingDebt(null)
   }
 
   // Handle Toggle Settled
-  async function handleToggleSettled(debt: Debt) {
+  function handleToggleSettled(debt: Debt) {
     const newSettledAt = debt.settled_at ? null : new Date().toISOString()
-    await updateMutation.mutateAsync({
+    updateMutation.mutate({
       id: debt.id,
       data: { settled_at: newSettledAt },
     })
   }
 
   // Handle Delete
-  async function handleDeleteDebt(id: string) {
+  function handleDeleteDebt(id: string) {
     if (!confirm('Apakah Anda yakin ingin menghapus catatan ini?')) return
-    await deleteMutation.mutateAsync(id)
+    deleteMutation.mutate(id)
   }
 
   // Summary Calculations
@@ -406,7 +406,6 @@ export default function DashboardPage() {
         }}
         onSave={handleSaveDebt}
         initialData={editingDebt}
-        isLoading={isSubmitting}
       />
     </div>
   )
