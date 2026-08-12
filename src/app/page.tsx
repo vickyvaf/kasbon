@@ -11,6 +11,7 @@ import { Logo } from '@/components/Logo'
 import { useDisclosure } from '@/hooks/useDisclosure'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useQueryClient } from '@tanstack/react-query'
+import { useUserQuery } from '@/hooks/useAuth'
 import {
   useDebtsQuery,
   useCreateDebtMutation,
@@ -73,6 +74,7 @@ export default function DashboardPage() {
   const [editingDebt, setEditingDebt] = useState<Debt | null>(null)
 
   // React Query Custom Hooks
+  const { data: user } = useUserQuery()
   const { data: debts = [], isLoading, isError, error } = useDebtsQuery(filters.status, filters.type)
   const createMutation = useCreateDebtMutation()
   const updateMutation = useUpdateDebtMutation()
@@ -161,6 +163,11 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center space-x-4">
+            {user?.email && (
+              <span className="text-xs sm:text-sm text-zinc-400 hidden sm:inline">
+                {user.email}
+              </span>
+            )}
             <Button variant="outline" size="sm" onClick={handleLogout} className="border-zinc-800 hover:bg-zinc-900 flex items-center gap-1.5">
               <LogOut className="w-4 h-4" />
               <span>Keluar</span>

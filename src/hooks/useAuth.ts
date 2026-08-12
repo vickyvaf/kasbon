@@ -1,6 +1,19 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 import { AuthFormInput } from '@/schemas/authSchema'
+
+export function useUserQuery() {
+  const supabase = createClient()
+
+  return useQuery({
+    queryKey: ['user'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      return user
+    },
+    staleTime: Infinity,
+  })
+}
 
 export function useLoginMutation() {
   const supabase = createClient()
