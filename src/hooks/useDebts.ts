@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { Debt, DebtStatusFilter, DebtTypeFilter } from '@/lib/types'
 import {
   fetchDebts,
@@ -47,7 +48,11 @@ export function useCreateDebtMutation() {
 
       return { previousQueries }
     },
-    onError: (_err, _newDebtInput, context) => {
+    onSuccess: () => {
+      toast.success('Catatan utang baru berhasil disimpan!')
+    },
+    onError: (err: any, _newDebtInput, context) => {
+      toast.error(err?.message || 'Gagal menyimpan catatan utang.')
       if (context?.previousQueries) {
         context.previousQueries.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data)
@@ -93,7 +98,11 @@ export function useUpdateDebtMutation() {
 
       return { previousQueries }
     },
-    onError: (_err, _variables, context) => {
+    onSuccess: () => {
+      toast.success('Catatan utang berhasil diperbarui!')
+    },
+    onError: (err: any, _variables, context) => {
+      toast.error(err?.message || 'Gagal memperbarui catatan utang.')
       if (context?.previousQueries) {
         context.previousQueries.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data)
@@ -123,7 +132,11 @@ export function useDeleteDebtMutation() {
 
       return { previousQueries }
     },
-    onError: (_err, _deletedId, context) => {
+    onSuccess: () => {
+      toast.success('Catatan utang berhasil dihapus!')
+    },
+    onError: (err: any, _deletedId, context) => {
+      toast.error(err?.message || 'Gagal menghapus catatan utang.')
       if (context?.previousQueries) {
         context.previousQueries.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data)

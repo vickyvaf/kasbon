@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { QueryProvider } from '@/providers/QueryProvider'
+import { Toaster } from 'sonner'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -15,7 +16,10 @@ export default function RootLayout({
   return (
     <html lang="id" className="h-full antialiased">
       <body className="min-h-full flex flex-col font-sans">
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          {children}
+          <Toaster position="top-right" theme="dark" richColors />
+        </QueryProvider>
       </body>
     </html>
   )
