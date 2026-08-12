@@ -22,7 +22,7 @@ export async function POST() {
       .order('created_at', { ascending: false })
 
     if (debtsError) {
-      return NextResponse.json({ error: debtsError.message }, { status: 500 })
+      return NextResponse.json({ error: 'Gagal mengambil data utang.' }, { status: 500 })
     }
 
     const pendingDebts = debts || []

@@ -35,6 +35,10 @@ export async function PATCH(
       Object.entries(body).filter(([_, v]) => v !== undefined)
     )
 
+    if (Object.keys(updatePayload).length === 0) {
+      return NextResponse.json({ error: 'Tidak ada field yang diperbarui.' }, { status: 400 })
+    }
+
     const { data, error } = await supabase
       .from('debts')
       .update(updatePayload)
@@ -75,16 +79,24 @@ export async function DELETE(
       )
     }
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('debts')
       .delete()
       .eq('id', id)
       .eq('user_id', user.id)
+      .select()
 
     if (error) {
       return NextResponse.json(
         { error: 'Gagal menghapus catatan utang.' },
         { status: 500 }
+      )
+    }
+
+    if (!data || data.length === 0) {
+      return NextResponse.json(
+        { error: 'Catatan tidak ditemukan.' },
+        { status: 404 }
       )
     }
 
