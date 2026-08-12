@@ -91,7 +91,7 @@ export function DebtModal({
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label>Tipe Utang</Label>
             <RadioGroup
@@ -181,7 +181,7 @@ export function DebtModal({
             )}
           </div>
 
-          <DialogFooter className="pt-2">
+          <DialogFooter>
             <Button
               type="button"
               variant="outline"
