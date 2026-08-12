@@ -43,6 +43,18 @@ import {
   AlertCircle,
 } from 'lucide-react'
 
+const STATUS_LABELS: Record<DebtStatusFilter, string> = {
+  all: 'Semua Status',
+  pending: 'Belum Lunas',
+  settled: 'Lunas',
+}
+
+const TYPE_LABELS: Record<DebtTypeFilter, string> = {
+  all: 'Semua Tipe',
+  owed_to_me: 'Di-hutang ke Saya',
+  i_owe: 'Saya Hutang',
+}
+
 export default function DashboardPage() {
   const router = useRouter()
   const supabase = createClient()
@@ -248,8 +260,8 @@ export default function DashboardPage() {
                 setFilters((prev) => ({ ...prev, status: val as DebtStatusFilter }))
               }
             >
-              <SelectTrigger className="w-[130px] h-9 text-sm bg-zinc-900 border-zinc-800">
-                <SelectValue placeholder="Status" />
+              <SelectTrigger className="w-[140px] h-9 text-sm bg-zinc-900 border-zinc-800">
+                <SelectValue>{STATUS_LABELS[filters.status]}</SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-zinc-900 border-zinc-800">
                 <SelectItem value="all">Semua Status</SelectItem>
@@ -264,8 +276,8 @@ export default function DashboardPage() {
                 setFilters((prev) => ({ ...prev, type: val as DebtTypeFilter }))
               }
             >
-              <SelectTrigger className="w-[145px] h-9 text-sm bg-zinc-900 border-zinc-800">
-                <SelectValue placeholder="Tipe" />
+              <SelectTrigger className="w-[160px] h-9 text-sm bg-zinc-900 border-zinc-800">
+                <SelectValue>{TYPE_LABELS[filters.type]}</SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-zinc-900 border-zinc-800">
                 <SelectItem value="all">Semua Tipe</SelectItem>
