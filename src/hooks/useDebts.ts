@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { DebtStatusFilter, DebtTypeFilter } from '@/lib/types'
+import { Debt, DebtStatusFilter, DebtTypeFilter } from '@/lib/types'
 import {
   fetchDebts,
   createDebt,
@@ -23,7 +23,38 @@ export function useCreateDebtMutation() {
 
   return useMutation({
     mutationFn: (data: CreateDebtFormInput) => createDebt(data),
-    onSuccess: () => {
+    onMutate: async (newDebtInput) => {
+      await queryClient.cancelQueries({ queryKey: ['debts'] })
+
+      const previousQueries = queryClient.getQueriesData<Debt[]>({ queryKey: ['debts'] })
+
+      const optimisticDebt: Debt = {
+        id: `temp-${Date.now()}`,
+        user_id: 'optimistic-user',
+        type: newDebtInput.type,
+        counterpart_name: newDebtInput.counterpart_name,
+        amount: newDebtInput.amount,
+        note: newDebtInput.note || null,
+        due_date: newDebtInput.due_date || new Date().toISOString().split('T')[0],
+        settled_at: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }
+
+      queryClient.setQueriesData<Debt[]>({ queryKey: ['debts'] }, (oldData) => {
+        return oldData ? [optimisticDebt, ...oldData] : [optimisticDebt]
+      })
+
+      return { previousQueries }
+    },
+    onError: (_err, _newDebtInput, context) => {
+      if (context?.previousQueries) {
+        context.previousQueries.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data)
+        })
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['debts'] })
     },
   })
@@ -35,7 +66,41 @@ export function useUpdateDebtMutation() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateDebtFormInput }) =>
       updateDebt({ id, data }),
-    onSuccess: () => {
+    onMutate: async ({ id, data: updateInput }) => {
+      await queryClient.cancelQueries({ queryKey: ['debts'] })
+
+      const previousQueries = queryClient.getQueriesData<Debt[]>({ queryKey: ['debts'] })
+
+      queryClient.setQueriesData<Debt[]>({ queryKey: ['debts'] }, (oldData) => {
+        if (!oldData) return []
+        return oldData.map((item) => {
+          if (item.id === id) {
+            return {
+              ...item,
+              ...updateInput,
+              counterpart_name:
+                updateInput.counterpart_name !== undefined
+                  ? updateInput.counterpart_name
+                  : item.counterpart_name,
+              amount:
+                updateInput.amount !== undefined ? updateInput.amount : item.amount,
+              updated_at: new Date().toISOString(),
+            }
+          }
+          return item
+        })
+      })
+
+      return { previousQueries }
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousQueries) {
+        context.previousQueries.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data)
+        })
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['debts'] })
     },
   })
@@ -46,7 +111,26 @@ export function useDeleteDebtMutation() {
 
   return useMutation({
     mutationFn: (id: string) => deleteDebt(id),
-    onSuccess: () => {
+    onMutate: async (deletedId) => {
+      await queryClient.cancelQueries({ queryKey: ['debts'] })
+
+      const previousQueries = queryClient.getQueriesData<Debt[]>({ queryKey: ['debts'] })
+
+      queryClient.setQueriesData<Debt[]>({ queryKey: ['debts'] }, (oldData) => {
+        if (!oldData) return []
+        return oldData.filter((item) => item.id !== deletedId)
+      })
+
+      return { previousQueries }
+    },
+    onError: (_err, _deletedId, context) => {
+      if (context?.previousQueries) {
+        context.previousQueries.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data)
+        })
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['debts'] })
     },
   })
