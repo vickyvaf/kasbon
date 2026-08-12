@@ -60,9 +60,6 @@ export default function DashboardPage() {
   const router = useRouter()
   const supabase = createClient()
 
-  // User state
-  const [userEmail, setUserEmail] = useState<string>('')
-
   // Consolidated Filters & Search Object State
   const [filters, setFilters] = useState({
     status: 'all' as DebtStatusFilter,
@@ -80,19 +77,6 @@ export default function DashboardPage() {
   const createMutation = useCreateDebtMutation()
   const updateMutation = useUpdateDebtMutation()
   const deleteMutation = useDeleteDebtMutation()
-
-  // Auth user session check
-  useEffect(() => {
-    async function checkAuth() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push('/login')
-        return
-      }
-      setUserEmail(user.email || '')
-    }
-    checkAuth()
-  }, [supabase, router])
 
   const queryClient = useQueryClient()
 
@@ -177,9 +161,6 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center space-x-4">
-            <span className="text-xs sm:text-sm text-zinc-400 hidden sm:inline">
-              {userEmail}
-            </span>
             <Button variant="outline" size="sm" onClick={handleLogout} className="border-zinc-800 hover:bg-zinc-900 flex items-center gap-1.5">
               <LogOut className="w-4 h-4" />
               <span>Keluar</span>
