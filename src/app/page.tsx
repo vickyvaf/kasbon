@@ -69,9 +69,8 @@ export default function DashboardPage() {
     groupByPerson: false,
   })
 
-  // Modal State using custom useDisclosure hook
-  const modalDisclosure = useDisclosure(false)
-  const [editingDebt, setEditingDebt] = useState<Debt | null>(null)
+  // Modal State using custom generic useDisclosure hook
+  const modalDisclosure = useDisclosure<Debt>()
 
   // React Query Custom Hooks
   const { data: user } = useUserQuery()
@@ -98,7 +97,6 @@ export default function DashboardPage() {
       createMutation.mutate(formData)
     }
     modalDisclosure.onClose()
-    setEditingDebt(null)
   }
 
   // Handle Toggle Settled
@@ -149,8 +147,6 @@ export default function DashboardPage() {
     }
     return acc
   }, {} as Record<string, { name: string; totalOwedToMe: number; totalIOwe: number; items: Debt[] }>)
-
-  const isSubmitting = createMutation.isPending || updateMutation.isPending
 
   return (
     <div className="min-h-screen bg-black text-foreground">
@@ -219,9 +215,8 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div
-                className={`text-2xl font-bold ${
-                  netBalance >= 0 ? 'text-emerald-500' : 'text-rose-500'
-                }`}
+                className={`text-2xl font-bold ${netBalance >= 0 ? 'text-emerald-500' : 'text-rose-500'
+                  }`}
               >
                 {formatRupiah(netBalance)}
               </div>
@@ -292,10 +287,7 @@ export default function DashboardPage() {
           </div>
 
           <Button
-            onClick={() => {
-              setEditingDebt(null)
-              modalDisclosure.onOpen()
-            }}
+            onClick={() => modalDisclosure.onOpen()}
             className="h-9 flex items-center gap-1.5 shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
           >
             <Plus className="w-4 h-4" />
@@ -332,10 +324,7 @@ export default function DashboardPage() {
                 variant="outline"
                 size="sm"
                 className="border-zinc-800 hover:bg-zinc-900"
-                onClick={() => {
-                  setEditingDebt(null)
-                  modalDisclosure.onOpen()
-                }}
+                onClick={() => modalDisclosure.onOpen()}
               >
                 <Plus className="w-4 h-4 mr-1.5 inline" /> Catat Sekarang
               </Button>
@@ -372,10 +361,7 @@ export default function DashboardPage() {
                       key={debt.id}
                       debt={debt}
                       onToggleSettled={handleToggleSettled}
-                      onEdit={(d) => {
-                        setEditingDebt(d)
-                        modalDisclosure.onOpen()
-                      }}
+                      onEdit={(d) => modalDisclosure.onOpen(d)}
                       onDelete={handleDeleteDebt}
                     />
                   ))}
@@ -392,10 +378,7 @@ export default function DashboardPage() {
                   key={debt.id}
                   debt={debt}
                   onToggleSettled={handleToggleSettled}
-                  onEdit={(d) => {
-                    setEditingDebt(d)
-                    modalDisclosure.onOpen()
-                  }}
+                  onEdit={(d) => modalDisclosure.onOpen(d)}
                   onDelete={handleDeleteDebt}
                 />
               ))}
@@ -407,12 +390,9 @@ export default function DashboardPage() {
       {/* Modal Form */}
       <DebtModal
         isOpen={modalDisclosure.isOpen}
-        onClose={() => {
-          modalDisclosure.onClose()
-          setEditingDebt(null)
-        }}
+        onClose={modalDisclosure.onClose}
         onSave={handleSaveDebt}
-        initialData={editingDebt}
+        initialData={modalDisclosure.data}
       />
     </div>
   )
@@ -442,11 +422,10 @@ function DebtListItem({
           </Badge>
           <Badge
             variant="outline"
-            className={`text-xs ${
-              isSettled
+            className={`text-xs ${isSettled
                 ? 'bg-zinc-800/60 text-zinc-400 border-zinc-700'
                 : 'bg-primary/10 text-primary border-primary/30'
-            }`}
+              }`}
           >
             {isSettled ? 'Lunas' : 'Belum Lunas'}
           </Badge>
