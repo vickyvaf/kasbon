@@ -31,13 +31,9 @@ export async function PATCH(
 
     const body = parseResult.data
 
-    const updatePayload: Record<string, unknown> = {}
-    if (body.type) updatePayload.type = body.type
-    if (body.counterpart_name !== undefined) updatePayload.counterpart_name = body.counterpart_name.trim()
-    if (body.amount !== undefined) updatePayload.amount = Math.round(body.amount)
-    if (body.note !== undefined) updatePayload.note = body.note ? body.note.trim() : null
-    if (body.due_date !== undefined) updatePayload.due_date = body.due_date
-    if (body.settled_at !== undefined) updatePayload.settled_at = body.settled_at
+    const updatePayload = Object.fromEntries(
+      Object.entries(body).filter(([_, v]) => v !== undefined)
+    )
 
     const { data, error } = await supabase
       .from('debts')
