@@ -53,6 +53,15 @@ export async function POST() {
     })
 
     if (error) {
+      if (error.message?.includes('You can only send testing emails')) {
+        return NextResponse.json(
+          {
+            error:
+              'Mode Testing Resend: Email hanya dapat dikirim ke vickyadi243@gmail.com (pemilik API Key Resend). Daftarkan domain di resend.com untuk kirim ke email lain.',
+          },
+          { status: 400 }
+        )
+      }
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
