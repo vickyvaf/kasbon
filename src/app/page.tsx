@@ -226,7 +226,7 @@ export default function DashboardPage() {
         {/* Action & Filter Bar */}
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between bg-zinc-950 p-4 rounded-lg border border-zinc-800">
           <div className="flex flex-wrap items-center gap-2">
-            <div className="relative flex-1 min-w-[160px]">
+            <div className="relative flex-1 min-w-40">
               <Search className="w-4 h-4 absolute left-2.5 top-3 text-zinc-500" />
               <Input
                 placeholder="Cari nama / catatan..."
@@ -244,7 +244,7 @@ export default function DashboardPage() {
                 setFilters((prev) => ({ ...prev, status: val as DebtStatusFilter }))
               }
             >
-              <SelectTrigger className="w-[140px] h-9 text-sm bg-zinc-900 border-zinc-800">
+              <SelectTrigger className="w-36 h-9 text-sm bg-zinc-900 border-zinc-800">
                 <SelectValue>{STATUS_LABELS[filters.status]}</SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-zinc-900 border-zinc-800">
@@ -260,7 +260,7 @@ export default function DashboardPage() {
                 setFilters((prev) => ({ ...prev, type: val as DebtTypeFilter }))
               }
             >
-              <SelectTrigger className="w-[160px] h-9 text-sm bg-zinc-900 border-zinc-800">
+              <SelectTrigger className="w-40 h-9 text-sm bg-zinc-900 border-zinc-800">
                 <SelectValue>{TYPE_LABELS[filters.type]}</SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-zinc-900 border-zinc-800">

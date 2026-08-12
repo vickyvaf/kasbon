@@ -79,7 +79,7 @@ export function DebtModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[425px] bg-zinc-950 border-zinc-800 text-foreground">
+      <DialogContent className="sm:max-w-md bg-zinc-950 border-zinc-800 text-foreground">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
             {initialData ? 'Edit Catatan Utang' : 'Catat Utang Baru'}
