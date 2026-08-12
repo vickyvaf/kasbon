@@ -4,6 +4,12 @@ Web aplikasi sederhana untuk mencatat dan mengelola utang-piutang pribadi, diban
 
 ---
 
+## Preview
+<img width="1425" height="777" alt="Screenshot 2026-08-12 at 21 37 02" src="https://github.com/user-attachments/assets/f89d8578-d373-4102-8580-bd8ae9301d84" />
+<img width="1425" height="776" alt="Screenshot 2026-08-12 at 21 38 06" src="https://github.com/user-attachments/assets/f4b6fa18-2b8b-4b8a-9054-7ef931159f65" />
+
+
+
 ## ⚙️ Setup
 
 ### 1. Environment Variables (`.env.local`)
