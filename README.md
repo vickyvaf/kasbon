@@ -50,17 +50,40 @@ Buka [http://localhost:3000](http://localhost:3000).
 ---
 
 ## 🔗 Demo
-- **Vercel Deploy**: [https://kasboncom.netlify.app](https://kasboncom.netlify.app)
+- **Netlify Deploy**: [https://kasboncom.netlify.app](https://kasboncom.netlify.app)
 
 ---
 
-## 💡 Approach
+## 💡 Best Approach & Additional
 Penerapan arsitektur **TanStack React Query Optimistic Updates** yang dipadukan dengan modal UI non-blocking (latensi 0ms) dan pemisahan komponen modular yang rapi. Seluruh mutasi data terasa instan, *loading state* ditangani tanpa *layout shift* menggunakan Skeleton UI khusus, dan keamanan data terjamin 100% melalui Supabase Row Level Security (RLS) berbasis `auth.uid() = user_id`.
+
+#### 📬 Email Reminder (Non-MVP)
+
+Fitur pengingat lewat email menggunakan Resend saat ini hanya dikonfigurasi untuk kebutuhan demo:
+
+- Email hanya dapat dikirim ke **alamat email pemilik Resend API Key / deployer** (misalnya `vickyadi243@gmail.com`), karena menggunakan domain default `onboarding@resend.dev` milik Resend.
+- Sesuai batasan resmi Resend, tanpa custom domain yang terverifikasi, pengiriman email dibatasi hanya ke owner email untuk keperluan testing.
+- Agar siap dan bisa mengirim ke semua user, diperlukan:
+  - Menyiapkan **custom domain**,
+  - Menambahkan dan memverifikasi DNS records (TXT, MX, DKIM) di Resend,
+  - Mengubah `from` address menjadi email dengan domain terverifikasi tersebut (contoh: `no-reply@kasbon.app`).
+
+#### 📤 Export CSV (Non-MVP)
+
+Selain email reminder, ada juga rencana fitur **export data utang-piutang ke file CSV** untuk mempermudah analisis dan backup pribadi:
+
+- Pengguna dapat mengekspor seluruh catatan utang-piutang ke satu file `.csv`.
+- Formatnya akan mencakup kolom seperti: tanggal, tipe (`owed_to_me` / `i_owe`), nama pihak terkait, nominal, status pelunasan, dan catatan singkat.
+- Secara teknis, implementasi direncanakan sebagai endpoint server-side sederhana (Next.js Route Handler) yang:
+  - Mengambil data `debts` milik user yang sedang login,
+  - Mengonversi ke CSV,
+
+Scope ini saat ini dianggap **di luar MVP** dan dapat dikerjakan sebagai peningkatan di iterasi berikutnya.
 
 ---
 
 ## 🛠️ Trade-off
-Kalau ada 1 hari lagi, saya akan menambahkan pengingat melalui whatsapp pengingat otomatis berkala (via Resend & Cron Job) saat tanggal jatuh tempo utang mendekat.
+Kalau ada 1 hari lagi, saya akan menambahkan pengingat melalui whatsapp pengingat otomatis berkala saat tanggal jatuh tempo utang mendekat.
 
 ---
 
