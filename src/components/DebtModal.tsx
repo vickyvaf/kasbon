@@ -97,13 +97,13 @@ export function DebtModal({
               className="flex space-x-4 pt-1"
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="owed_to_me" id="r-owed" className="border-zinc-700 text-[#FC580F]" />
+                <RadioGroupItem value="owed_to_me" id="r-owed" className="border-zinc-700 text-primary" />
                 <Label htmlFor="r-owed" className="cursor-pointer text-sm">
                   Saya dihutang (Piutang)
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="i_owe" id="r-owe" className="border-zinc-700 text-[#FC580F]" />
+                <RadioGroupItem value="i_owe" id="r-owe" className="border-zinc-700 text-primary" />
                 <Label htmlFor="r-owe" className="cursor-pointer text-sm">
                   Saya hutang (Utang)
                 </Label>
@@ -119,7 +119,7 @@ export function DebtModal({
             <Input
               id="counterpart"
               placeholder="Contoh: Budi"
-              className="bg-zinc-900 border-zinc-800 focus-visible:ring-[#FC580F]"
+              className="bg-zinc-900 border-zinc-800 focus-visible:ring-primary"
               {...register('counterpart_name')}
             />
             {errors.counterpart_name && (
@@ -142,7 +142,7 @@ export function DebtModal({
                 const parsed = digitsOnly ? parseInt(digitsOnly, 10) : undefined
                 setValue('amount', parsed as any, { shouldValidate: true })
               }}
-              className="bg-zinc-900 border-zinc-800 focus-visible:ring-[#FC580F]"
+              className="bg-zinc-900 border-zinc-800 focus-visible:ring-primary"
             />
             {errors.amount && (
               <p className="text-xs text-red-400">{errors.amount.message}</p>
@@ -154,7 +154,7 @@ export function DebtModal({
             <Input
               id="dueDate"
               type="date"
-              className="bg-zinc-900 border-zinc-800 focus-visible:ring-[#FC580F]"
+              className="bg-zinc-900 border-zinc-800 focus-visible:ring-primary"
               {...register('due_date')}
             />
             {errors.due_date && (
@@ -173,7 +173,7 @@ export function DebtModal({
               id="note"
               placeholder="Catatan singkat..."
               maxLength={200}
-              className="bg-zinc-900 border-zinc-800 focus-visible:ring-[#FC580F]"
+              className="bg-zinc-900 border-zinc-800 focus-visible:ring-primary"
               {...register('note')}
             />
             {errors.note && (
@@ -190,7 +190,7 @@ export function DebtModal({
             >
               Batal
             </Button>
-            <Button type="submit" className="bg-[#FC580F] hover:bg-[#e04c0b] text-white">
+            <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground">
               Simpan
             </Button>
           </DialogFooter>

@@ -250,7 +250,7 @@ export default function DashboardPage() {
                 onChange={(e) =>
                   setFilters((prev) => ({ ...prev, search: e.target.value }))
                 }
-                className="pl-8 h-9 text-sm bg-zinc-900 border-zinc-800 focus-visible:ring-[#FC580F]"
+                className="pl-8 h-9 text-sm bg-zinc-900 border-zinc-800 focus-visible:ring-primary"
               />
             </div>
 
@@ -305,7 +305,7 @@ export default function DashboardPage() {
               setEditingDebt(null)
               modalDisclosure.onOpen()
             }}
-            className="h-9 flex items-center gap-1.5 shrink-0 bg-[#FC580F] hover:bg-[#e04c0b] text-white font-medium"
+            className="h-9 flex items-center gap-1.5 shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
           >
             <Plus className="w-4 h-4" />
             <span>Catat Baru</span>
@@ -454,7 +454,7 @@ function DebtListItem({
             className={`text-xs ${
               isSettled
                 ? 'bg-zinc-800/60 text-zinc-400 border-zinc-700'
-                : 'bg-[#FC580F]/10 text-[#FC580F] border-[#FC580F]/30'
+                : 'bg-primary/10 text-primary border-primary/30'
             }`}
           >
             {isSettled ? 'Lunas' : 'Belum Lunas'}
@@ -487,7 +487,7 @@ function DebtListItem({
               </>
             ) : (
               <>
-                <CheckCircle2 className="w-3.5 h-3.5 text-[#FC580F]" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
                 <span>Tandai Lunas</span>
               </>
             )}

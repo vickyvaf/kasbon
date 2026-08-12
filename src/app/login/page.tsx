@@ -63,7 +63,7 @@ export default function LoginPage() {
                 id="email"
                 type="email"
                 placeholder="nama@email.com"
-                className="bg-zinc-900 border-zinc-800 focus-visible:ring-[#FC580F]"
+                className="bg-zinc-900 border-zinc-800 focus-visible:ring-primary"
                 {...register('email')}
               />
               {errors.email && (
@@ -78,7 +78,7 @@ export default function LoginPage() {
                   id="password"
                   type={showPassword.isOpen ? 'text' : 'password'}
                   placeholder="••••••••"
-                  className="bg-zinc-900 border-zinc-800 pr-10 focus-visible:ring-[#FC580F]"
+                  className="bg-zinc-900 border-zinc-800 pr-10 focus-visible:ring-primary"
                   {...register('password')}
                 />
                 <button
@@ -102,7 +102,7 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full bg-[#FC580F] hover:bg-[#e04c0b] text-white font-medium"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
               disabled={loginMutation.isPending}
             >
               {loginMutation.isPending ? 'Memproses...' : 'Masuk'}
@@ -114,7 +114,7 @@ export default function LoginPage() {
             Belum punya akun?{' '}
             <Link
               href="/signup"
-              className="font-medium text-[#FC580F] hover:underline underline-offset-4"
+              className="font-medium text-primary hover:underline underline-offset-4"
             >
               Daftar sekarang
             </Link>
