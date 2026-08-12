@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -11,7 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Settings, Mail } from 'lucide-react'
-import { toast } from 'sonner'
+import { useSendReminderMutation } from '@/hooks/useReminder'
 
 interface SettingsModalProps {
   isOpen: boolean
@@ -24,24 +23,7 @@ export function SettingsModal({
   onClose,
   userEmail,
 }: SettingsModalProps) {
-  const [isSending, setIsSending] = useState(false)
-
-  async function handleSendReminderNow() {
-    setIsSending(true)
-    try {
-      const res = await fetch('/api/reminder/send', { method: 'POST' })
-      const data = await res.json()
-      if (!res.ok) {
-        toast.error(data.error || 'Gagal mengirim email pengingat.')
-      } else {
-        toast.success(data.message || `Email pengingat berhasil dikirim ke ${userEmail}`)
-      }
-    } catch {
-      toast.error('Terjadi kesalahan saat mengirim email.')
-    } finally {
-      setIsSending(false)
-    }
-  }
+  const sendReminderMutation = useSendReminderMutation(userEmail)
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -83,11 +65,11 @@ export function SettingsModal({
               type="button"
               variant="outline"
               size="sm"
-              onClick={handleSendReminderNow}
-              disabled={isSending}
+              onClick={() => sendReminderMutation.mutate()}
+              disabled={sendReminderMutation.isPending}
               className="w-full mt-2 border-zinc-700 hover:bg-zinc-800 text-xs font-medium"
             >
-              {isSending ? 'Mengirim Email...' : 'Kirim Ringkasan ke Email Saya'}
+              {sendReminderMutation.isPending ? 'Mengirim Email...' : 'Kirim Ringkasan ke Email Saya'}
             </Button>
           </div>
         </div>
